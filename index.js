@@ -15,6 +15,10 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+app.get("/test", (req, res) => {
+  res.send((new Date).toLocaleString());
+});
+
 server.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
 
@@ -22,7 +26,7 @@ console.log(`Running on http://${HOST}:${PORT}`);
 const mediasoup = require("mediasoup");
 process.env.DEBUG = "mediasoup*";
 
-global.worker;
+global.worker = {};
 global.rooms = [];
 
 (async () => {
