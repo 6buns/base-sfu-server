@@ -3,8 +3,7 @@
 const express = require("express");
 
 // Constants
-const PORT = 8080;
-const HOST = "0.0.0.0";
+const PORT = process.env.PORT || 8080;
 
 // App
 const app = express();
@@ -19,8 +18,9 @@ app.get("/test", (req, res) => {
   res.send((new Date).toLocaleString());
 });
 
-server.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Running on ${PORT}`);
+});
 
 
 const mediasoup = require("mediasoup");
