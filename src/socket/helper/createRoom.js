@@ -1,10 +1,10 @@
 const { mediaCodecs } = require("../../../config/mediasoup");
 const Room = require("../../Room");
 
-const createRoom = async (room, { type }) => {
+const createRoom = async (room, options) => {
     let router,
         peers = [],
-        codecs = mediaCodecs[type || 'video'];
+        codecs = mediaCodecs[options?.type || 'video'];
 
     if (rooms[room]) {
         router = rooms[room].router;
