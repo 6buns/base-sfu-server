@@ -31,22 +31,19 @@ const os = require('os')
 const ifaces = os.networkInterfaces();
 global.localIp = "127.0.0.1";
 
-const getLocalIp = () => {
+(() => {
   Object.keys(ifaces).forEach((ifname) => {
     for (const iface of ifaces[ifname] ?? []) {
       // Ignore IPv6 and 127.0.0.1
       if (iface.family !== "IPv4" || iface.internal !== false) {
         continue;
       }
-
       // Set the local ip to the first IPv4 address found and exit the loop
       localIp = iface.address;
       return;
     }
   });
-};
-
-const localIp = getLocalIp();
+})();
 
 global.worker = {};
 global.rooms = [];
