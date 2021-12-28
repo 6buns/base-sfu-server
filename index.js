@@ -26,7 +26,7 @@ server.listen(PORT, () => {
 const mediasoup = require("mediasoup");
 process.env.DEBUG = "mediasoup*";
 
-import os from "os";
+const os = require('os')
 
 const ifaces = os.networkInterfaces();
 global.localIp = "127.0.0.1";
