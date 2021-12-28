@@ -23,4 +23,8 @@ COPY . .
 
 EXPOSE 8080
 
+EXPOSE 40000-49999/tcp
+
+EXPOSE 40000-49999/udp
+
 CMD [ "node", "index.js" ]
