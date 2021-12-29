@@ -64,7 +64,7 @@ const webRtcTransport_options = {
     listenIps: [
         {
             ip: '0.0.0.0',
-            announcedIp: localIp,
+            announcedIp: '127.0.0.1',
         },
     ],
     enableUdp: true,

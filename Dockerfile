@@ -16,15 +16,9 @@ COPY package*.json ./
 RUN npm install
 
 # If you are building your code for production
-# RUN npm ci --only=production
+RUN npm ci --only=production
 
 # Bundle app source
 COPY . .
-
-EXPOSE 80:8080
-
-EXPOSE 40000-49999:40000-49999/tcp
-
-EXPOSE 40000-49999:40000-49999/udp
 
 CMD [ "node", "index.js" ]

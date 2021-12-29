@@ -26,25 +26,6 @@ server.listen(PORT, () => {
 const mediasoup = require("mediasoup");
 process.env.DEBUG = "mediasoup*";
 
-const os = require('os')
-
-const ifaces = os.networkInterfaces();
-global.localIp = "127.0.0.1";
-
-(() => {
-  Object.keys(ifaces).forEach((ifname) => {
-    for (const iface of ifaces[ifname] ?? []) {
-      // Ignore IPv6 and 127.0.0.1
-      if (iface.family !== "IPv4" || iface.internal !== false) {
-        continue;
-      }
-      // Set the local ip to the first IPv4 address found and exit the loop
-      localIp = iface.address;
-      return;
-    }
-  });
-})();
-
 global.worker = {};
 global.rooms = [];
 
@@ -77,11 +58,12 @@ mediasoup.observer.on("newworker", (worker) => {
     console.log(
       "new router created [worker.pid:%d, router.id:%s]",
       worker.pid,
-      router.id
+      JSON.stringify(rooms)
     );
 
     router.observer.on("close", () => {
-      console.log("router closed [router.id:%s]", router.id);
+      console.log("router closed [router.id:%s]",
+        JSON.stringify(rooms));
     });
 
     router.observer.on("newtransport", (transport) => {
