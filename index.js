@@ -1,29 +1,59 @@
 "use strict";
-
 const express = require("express");
+const os = require('os')
 
 // Constants
 const PORT = process.env.PORT || 8080;
+const cpuCount = os.cpus().length;
 
 // App
 const app = express();
-const http = require('http');
+const http = require("http");
 const server = http.createServer(app);
+const { fetchMeta } = require("./src/lib/fetch");
+
+global.arr = [];
+global.salt = '';
+// global.consumerLimit = cpuCount * 400;
+global.consumerLimit = 100;
+
+global.metadata = {};
+
+(async () => {
+
+  metadata.id = ''
+  metadata.id = await fetchMeta('id')
+
+  metadata.ip = ''
+  metadata.ip = await fetchMeta('network-interfaces/ip')
+
+  metadata.announcedIp = ''
+  metadata.announcedIp = await fetchMeta('network-interfaces/access-configs/external-ip')
+
+  arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
+  salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
+})()
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
 app.get("/test", (req, res) => {
-  res.send((new Date).toLocaleString());
+  res.send(new Date().toLocaleString());
 });
+
+app.get('/key', (req, res) => {
+  res.status(200).json({
+    key: keygen()
+  })
+})
 
 server.listen(PORT, () => {
   console.log(`Running on ${PORT}`);
 });
 
-
 const mediasoup = require("mediasoup");
+const { keygen, keyVerify } = require("./src/socket/helper/keygen");
 process.env.DEBUG = "mediasoup*";
 
 global.worker = {};
@@ -33,7 +63,7 @@ global.rooms = [];
   worker = await mediasoup.createWorker({
     logLevel: "debug",
     rtcMinPort: 40000,
-    rtcMaxPort: 49999
+    rtcMaxPort: 49999,
   });
   console.log(`worker pid ${worker.pid}`);
 
@@ -45,6 +75,15 @@ global.rooms = [];
 })();
 
 const io = require("socket.io")(server);
+
+io.use((socket, next) => {
+  if (keyVerify(socket.handshake.auth.key)) {
+    next();
+  } else {
+    next(new Error("unauthorized"))
+  }
+})
+
 require("./src/socket")(io);
 
 mediasoup.observer.on("newworker", (worker) => {
@@ -62,8 +101,7 @@ mediasoup.observer.on("newworker", (worker) => {
     );
 
     router.observer.on("close", () => {
-      console.log("router closed [router.id:%s]",
-        JSON.stringify(rooms));
+      console.log("router closed [router.id:%s]", JSON.stringify(rooms));
     });
 
     router.observer.on("newtransport", (transport) => {

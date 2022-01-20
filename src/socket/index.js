@@ -41,15 +41,13 @@ module.exports = (io) => {
             createWebRtcTransportHandler(io, socket)
         );
 
+        socket.on("getProducers", getProducers(io, socket));
+        socket.on("transport:consumer-connect", recieverConnect(io, socket));
+        socket.on("transport:consumer-consume", recieverConsume(io, socket));
+        socket.on("consumer-resume", recieverResume(io, socket));
+
         socket.on("transport:producer-connect", senderConnect(io, socket));
         socket.on("transport:producer-produce", senderProduce(io, socket));
         socket.on("transport:producer-close", senderClose(io, socket));
-
-        socket.on("getProducers", getProducers(io, socket));
-
-        socket.on("transport:consumer-connect", recieverConnect(io, socket));
-        socket.on("transport:consumer-consume", recieverConsume(io, socket));
-
-        socket.on("consumer-resume", recieverResume(io, socket));
     });
 };

@@ -63,8 +63,8 @@ const mediaCodecs = {
 const webRtcTransport_options = {
     listenIps: [
         {
-            ip: '0.0.0.0',
-            announcedIp: '34.70.178.77'
+            ip: metadata.ip,
+            announcedIp: metadata.announcedIp
         },
     ],
     enableUdp: true,

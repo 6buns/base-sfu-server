@@ -11,7 +11,7 @@ const join = (io, socket) => {
 
         const rtpCapabilities = router1.rtpCapabilities;
 
-        callback({ rtpCapabilities });
+        callback({ rtpCapabilities }); 
     };
 };
 
