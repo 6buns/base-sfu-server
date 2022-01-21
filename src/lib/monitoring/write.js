@@ -21,7 +21,7 @@ async function writeTimeSeriesData(val, client) {
       type: 'custom.googleapis.com/consumer/count',
     },
     resource: {
-      type: 'global',
+      type: 'gce_instance',
     },
     points: [dataPoint],
   };

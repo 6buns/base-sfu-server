@@ -35,6 +35,15 @@ global.metadata = {};
 
 (async () => {
 
+  const timeseries = await readTimeSeriesFields(moniteringClient)
+  timeseries.length > 1 && timeseries.forEach(e => {
+    e.points.forEach(p => {
+      if (JSON.stringify(p.value) !== '0') {
+        localConsumerCount = p.value
+      }
+    })
+  });
+
   metadata.id = ''
   metadata.id = await fetchMeta('id')
 
@@ -68,7 +77,7 @@ server.listen(PORT, () => {
 
 const mediasoup = require("mediasoup");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
-const { writeTimeSeriesData } = require("./src/lib/writeTimeSeriesData");
+const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
 process.env.DEBUG = "mediasoup*";
 
 global.worker = {};
@@ -103,6 +112,8 @@ require("./src/socket")(io);
 
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
+
+
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
