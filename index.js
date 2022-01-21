@@ -12,11 +12,25 @@ const http = require("http");
 const server = http.createServer(app);
 const { fetchMeta } = require("./src/lib/fetch");
 
+const monitoring = require('@google-cloud/monitoring');
+let { Client } = require('redis-om');
+
+const moniteringClient = new monitoring.MetricServiceClient();
+global.redisClient = {};
+
+(async function () {
+
+  redisClient = new Client()
+  await redisClient.open('redis://localhost:6379')
+
+  await client.close()
+})()
+
 global.arr = [];
 global.salt = '';
 // global.consumerLimit = cpuCount * 400;
 global.consumerLimit = 100;
-
+global.localConsumerCount = 0;
 global.metadata = {};
 
 (async () => {
@@ -54,6 +68,7 @@ server.listen(PORT, () => {
 
 const mediasoup = require("mediasoup");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
+const { writeTimeSeriesData } = require("./src/lib/writeTimeSeriesData");
 process.env.DEBUG = "mediasoup*";
 
 global.worker = {};
@@ -139,8 +154,14 @@ mediasoup.observer.on("newworker", (worker) => {
           consumer.id
         );
 
+        localConsumerCount += 0.01;
+        writeTimeSeriesData(localConsumerCount, moniteringClient);
+
         consumer.observer.on("close", () => {
           console.log("consumer closed [consumer.id:%s]", consumer.id);
+
+          localConsumerCount -= 0.01;
+          writeTimeSeriesData(localConsumerCount, moniteringClient);
         });
       });
     });
