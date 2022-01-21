@@ -16,15 +16,6 @@ const monitoring = require('@google-cloud/monitoring');
 let { Client } = require('redis-om');
 
 const moniteringClient = new monitoring.MetricServiceClient();
-global.redisClient = {};
-
-(async function () {
-
-  redisClient = new Client()
-  await redisClient.open('redis://localhost:6379')
-
-  await client.close()
-})()
 
 global.arr = [];
 global.salt = '';
@@ -32,6 +23,7 @@ global.salt = '';
 global.consumerLimit = 100;
 global.localConsumerCount = 0;
 global.metadata = {};
+global.indexNotCreated = true;
 
 (async () => {
 
@@ -43,6 +35,9 @@ global.metadata = {};
       }
     })
   });
+
+  metadata.redis_url = ''
+  metadata.redis_url = await fetchMeta('attributes/REDIS_URL')
 
   metadata.id = ''
   metadata.id = await fetchMeta('id')

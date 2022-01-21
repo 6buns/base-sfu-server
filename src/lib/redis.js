@@ -1,4 +1,4 @@
-import { Client, Entity, Schema, Repository } from 'redis-om';
+const { Client, Entity, Schema, Repository } = require('redis-om');
 
 const client = new Client();
 
@@ -17,11 +17,11 @@ let schema = new Schema(
         ip: { type: 'string' },
         announcedIp: { type: 'string' }
     }, {
-        dataStructure: 'JSON'
-    }
+    dataStructure: 'JSON'
+}
 )
 
-export async function createRoom(id) {
+exports.createRoomInRedis = async function (id) {
     await connect();
 
     const repository = new Repository(schema, client);
@@ -33,7 +33,7 @@ export async function createRoom(id) {
     return id
 }
 
-export async function createIndex() {
+exports.createIndexInRedis = async function () {
     await connect();
 
     const repository = new Repository(schema, client);
@@ -41,7 +41,7 @@ export async function createIndex() {
     await repository.createIndex();
 }
 
-export async function findRoom(id) {
+exports.findRoomInRedis = async function (id) {
     await connect();
 
     const repository = new Repository(schema, client);

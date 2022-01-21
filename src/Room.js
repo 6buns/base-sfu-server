@@ -1,7 +1,8 @@
 module.exports = class Room {
-  constructor(roomName, router) {
+  constructor(roomName, router, pipeTransport) {
     this.name = roomName;
     this.router = router;
+    this.pipeTransport = pipeTransport;
     this.peers = [];
     this.hasProducers = false;
     this.consumerCount = 0;
@@ -42,4 +43,9 @@ module.exports = class Room {
     });
     return prodList;
   };
+
+  _closeRoom = () => {
+    this.router.close()
+  };
+
 };

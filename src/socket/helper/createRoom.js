@@ -1,4 +1,5 @@
 const { mediaCodecs } = require("../../../config/mediasoup");
+const { createIndexInRedis, findRoomInRedis, createRoomInRedis } = require("../../lib/redis");
 const Room = require("../../Room");
 
 const createRoom = async (room, options) => {
@@ -10,15 +11,34 @@ const createRoom = async (room, options) => {
         router = rooms[room].router;
         peers = rooms[room].peers || [];
     } else {
-        // create a room.
-        router = await worker.createRouter({ mediaCodecs: codecs });
-        rooms[room] = new Room(room, router);
+        if (indexNotCreated) {
+            await createIndexInRedis()
+            indexNotCreated = false
+        }
         // check in redis,
+        const isInRedis = await findRoomInRedis(room)
         if (isInRedis) {
+            // create a room.
+            router = await worker.createRouter({ mediaCodecs: codecs });
             // create a pipe,
-            // store its reference in redis as multiplier.
+            const pipeTransport = await router.createPipeTransport({
+                listenIp: [{ ip: isInRedis.ip, announcedIp: isInRedis.announcedIp }]
+            });
+
+            // connect pipe transport
+            pipeTransport.connect({
+                ip: isInRedis.announcedIp
+            })
+
+            // store.
+            rooms[room] = new Room(room, router);
         } else {
+            // create a room.
+            router = await worker.createRouter({ mediaCodecs: codecs });
             // store it in redis as original.
+            await createRoomInRedis(room)
+            // store.
+            rooms[room] = new Room(room, router);
         }
     }
 
