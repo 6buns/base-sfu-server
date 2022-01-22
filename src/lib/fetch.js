@@ -4,8 +4,7 @@ exports.fetchMeta = async (url) => {
     return new Promise((resolve, reject) => {
         http
             .get({
-                hostname: 'http://metadata.google.internal',
-                path: `/computeMetadata/v1/instance/${url}`,
+                path: `http://metadata.google.internal/computeMetadata/v1/instance/${url}`,
                 headers: {
                     'Metadata-Flavor': 'Google'
                 }
@@ -15,7 +14,13 @@ exports.fetchMeta = async (url) => {
                     data += chunk;
                 });
                 resp.on("end", () => {
-                    resolve(data);
+                    try {
+                        const parsedData = JSON.parse(rawData);
+                        console.log(parsedData);
+                        resolve(parsedData);
+                    } catch (e) {
+                        console.error(e.message);
+                    }
                 });
             })
             .on("error", (err) => {
