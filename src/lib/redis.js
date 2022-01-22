@@ -28,9 +28,9 @@ exports.createRoomInRedis = async function (id) {
 
     const room = repository.createEntity({ id, ip: metadata.ip, announcedIp: metadata.announcedIp });
 
-    const id = await repository.save(room);
+    const rid = await repository.save(room);
 
-    return id
+    return rid
 }
 
 exports.createIndexInRedis = async function () {
