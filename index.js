@@ -11,9 +11,14 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { fetchMeta } = require("./src/lib/fetch");
-
+const { keygen, keyVerify } = require("./src/socket/helper/keygen");
+const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
+const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
 const monitoring = require('@google-cloud/monitoring');
 let { Client } = require('redis-om');
+const mediasoup = require("mediasoup");
+
+process.env.DEBUG = "mediasoup*";
 
 const moniteringClient = new monitoring.MetricServiceClient();
 
@@ -66,11 +71,6 @@ app.get('/key', (req, res) => {
 server.listen(PORT, () => {
   console.log(`Running on ${PORT}`);
 });
-
-const mediasoup = require("mediasoup");
-const { keygen, keyVerify } = require("./src/socket/helper/keygen");
-const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
-process.env.DEBUG = "mediasoup*";
 
 global.worker = {};
 global.rooms = [];
