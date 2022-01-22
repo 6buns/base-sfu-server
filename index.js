@@ -17,6 +17,7 @@ const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
 const monitoring = require('@google-cloud/monitoring');
 let { Client } = require('redis-om');
 const mediasoup = require("mediasoup");
+const { createMetricDescriptor } = require("./src/lib/monitoring/create");
 const moniteringClient = new monitoring.MetricServiceClient();
 process.env.DEBUG = "mediasoup*";
 
