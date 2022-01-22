@@ -17,10 +17,8 @@ const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
 const monitoring = require('@google-cloud/monitoring');
 let { Client } = require('redis-om');
 const mediasoup = require("mediasoup");
-
-process.env.DEBUG = "mediasoup*";
-
 const moniteringClient = new monitoring.MetricServiceClient();
+process.env.DEBUG = "mediasoup*";
 
 global.arr = [];
 global.salt = '';
@@ -30,19 +28,6 @@ global.localConsumerCount = 0;
 global.metadata = {};
 global.indexNotCreated = true;
 
-(async () => {
-  metadata.id = ''
-  metadata.id = await fetchMeta('id')
-
-  metadata.ip = ''
-  metadata.ip = await fetchMeta('network-interfaces/0/ip')
-
-  metadata.announcedIp = ''
-  metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
-
-  arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
-  salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
-})()
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -61,6 +46,20 @@ app.get('/key', (req, res) => {
 server.listen(PORT, () => {
   console.log(`Running on ${PORT}`);
 });
+
+(async () => {
+  metadata.id = ''
+  metadata.id = await fetchMeta('id')
+
+  metadata.ip = ''
+  metadata.ip = await fetchMeta('network-interfaces/0/ip')
+
+  metadata.announcedIp = ''
+  metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
+
+  arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
+  salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
+})()
 
 global.worker = {};
 global.rooms = [];
