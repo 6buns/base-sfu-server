@@ -36,17 +36,14 @@ global.indexNotCreated = true;
     })
   });
 
-  metadata.redis_url = ''
-  metadata.redis_url = await fetchMeta('attributes/REDIS_URL')
-
   metadata.id = ''
   metadata.id = await fetchMeta('id')
 
   metadata.ip = ''
-  metadata.ip = await fetchMeta('network-interfaces/ip')
+  metadata.ip = await fetchMeta('network-interfaces/0/ip')
 
   metadata.announcedIp = ''
-  metadata.announcedIp = await fetchMeta('network-interfaces/access-configs/external-ip')
+  metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
 
   arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
   salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
@@ -160,13 +157,13 @@ mediasoup.observer.on("newworker", (worker) => {
           consumer.id
         );
 
-        localConsumerCount += 0.01;
+        localConsumerCount += 1;
         writeTimeSeriesData(localConsumerCount, moniteringClient);
 
         consumer.observer.on("close", () => {
           console.log("consumer closed [consumer.id:%s]", consumer.id);
 
-          localConsumerCount -= 0.01;
+          localConsumerCount -= 1;
           writeTimeSeriesData(localConsumerCount, moniteringClient);
         });
       });

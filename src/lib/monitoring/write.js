@@ -18,10 +18,10 @@ async function writeTimeSeriesData(val, client) {
 
   const timeSeriesData = {
     metric: {
-      type: 'custom.googleapis.com/consumer/count',
+      type: 'custom.googleapis.com/consumer_count',
     },
     resource: {
-      type: 'gce_instance',
+      type: 'global',
     },
     points: [dataPoint],
   };
