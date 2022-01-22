@@ -6,7 +6,7 @@ async function readTimeSeriesFields(client) {
 
     const request = {
         name: client.projectPath(projectId),
-        filter: 'metric.type="custom.googleapis.com/consumer/count"',
+        filter: 'metric.type="custom.googleapis.com/consumer_count"',
         interval: {
             startTime: {
                 // Limit results to the last 20 minutes
