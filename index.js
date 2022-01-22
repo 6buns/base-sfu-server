@@ -95,20 +95,22 @@ require("./src/socket")(io);
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
 
-  try {
-    const timeseries = await readTimeSeriesFields(moniteringClient)
-    timeseries.length > 1 && timeseries.forEach(e => {
-      e.points.forEach(p => {
-        if (JSON.stringify(p.value) !== '0') {
-          localConsumerCount = p.value
-        }
-      })
-    });
-  } catch (error) {
-    await createMetricDescriptor(moniteringClient)
-  } finally {
-    await writeTimeSeriesData(localConsumerCount, moniteringClient);
-  }
+  (async () => {
+    try {
+      const timeseries = await readTimeSeriesFields(moniteringClient)
+      timeseries.length > 1 && timeseries.forEach(e => {
+        e.points.forEach(p => {
+          if (JSON.stringify(p.value) !== '0') {
+            localConsumerCount = p.value
+          }
+        })
+      });
+    } catch (error) {
+      await createMetricDescriptor(moniteringClient)
+    } finally {
+      await writeTimeSeriesData(localConsumerCount, moniteringClient);
+    }
+  })()
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
