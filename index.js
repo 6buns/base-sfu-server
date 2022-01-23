@@ -51,14 +51,18 @@ server.listen(PORT, () => {
 });
 
 (async () => {
-  metadata.id = ''
-  metadata.id = await fetchMeta('id')
+  try {
+    metadata.id = ''
+    metadata.id = await fetchMeta('id')
 
-  metadata.ip = ''
-  metadata.ip = await fetchMeta('network-interfaces/0/ip')
+    metadata.ip = ''
+    metadata.ip = await fetchMeta('network-interfaces/0/ip')
 
-  metadata.announcedIp = ''
-  metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
+    metadata.announcedIp = ''
+    metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
+  } catch (error) {
+    console.log(error)
+  }
 
   arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
   salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
