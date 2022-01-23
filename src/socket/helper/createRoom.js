@@ -12,6 +12,7 @@ const createRoom = async (room, options) => {
         peers = rooms[room].peers || [];
     } else {
         if (indexNotCreated) {
+            console.log('Yahan aake ruk gya...')
             await createIndexInRedis()
             indexNotCreated = false
         }

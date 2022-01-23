@@ -4,6 +4,7 @@ const client = new Client();
 
 async function connect() {
     if (!client.isOpen()) {
+        console.log('Trying to Connect.')
         await client.open(process.env.REDIS_URL)
     }
 }
