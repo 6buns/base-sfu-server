@@ -46,6 +46,7 @@ app.get('/key', (req, res) => {
 })
 
 server.listen(PORT, () => {
+  console.log(process.env.REDIS_URL);
   console.log(`Running on ${PORT}`);
 });
 
