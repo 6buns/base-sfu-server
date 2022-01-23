@@ -6,7 +6,7 @@ exports.createMetricDescriptor = async (client) => {
             description: 'Total Consumers from all VMs.',
             displayName: 'Consumer Count',
             type: 'custom.googleapis.com/consumer_count',
-            metricKind: 'DELTA',
+            metricKind: 'GAUGE',
             valueType: 'DOUBLE',
         },
     };
