@@ -2,6 +2,8 @@
 const express = require("express");
 const os = require('os')
 
+require('dotenv').config()
+
 // Constants
 const PORT = process.env.PORT || 8080;
 const cpuCount = os.cpus().length;

@@ -12,6 +12,7 @@
     "mediasoup": "^3.9.2",
     "socket.io": "^4.4.0",
     "@google-cloud/monitoring": "^2.3.5",
-    "redis-om": "^0.1.7"
+    "redis-om": "^0.1.7",
+    "dotenv": "^14.2.0"
   }
 }
