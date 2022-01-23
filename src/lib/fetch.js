@@ -14,13 +14,7 @@ exports.fetchMeta = async (url) => {
                     data += chunk;
                 });
                 resp.on("end", () => {
-                    try {
-                        const parsedData = JSON.parse(rawData);
-                        console.log(parsedData);
-                        resolve(parsedData);
-                    } catch (e) {
-                        console.error(e.message);
-                    }
+                    resolve(data);
                 });
             })
             .on("error", (err) => {

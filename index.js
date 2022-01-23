@@ -10,20 +10,19 @@ const cpuCount = os.cpus().length;
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
+const monitoring = require('@google-cloud/monitoring');
+const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
 const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
 const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
-const monitoring = require('@google-cloud/monitoring');
-let { Client } = require('redis-om');
-const mediasoup = require("mediasoup");
 const { createMetricDescriptor } = require("./src/lib/monitoring/create");
+
 const moniteringClient = new monitoring.MetricServiceClient();
 process.env.DEBUG = "mediasoup*";
 
 global.arr = [];
 global.salt = '';
-// global.consumerLimit = cpuCount * 400;
 global.consumerLimit = 100;
 global.localConsumerCount = 0;
 global.metadata = {};
@@ -95,22 +94,22 @@ require("./src/socket")(io);
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
 
-  // (async () => {
-  //   try {
-  //     const timeseries = await readTimeSeriesFields(moniteringClient)
-  //     timeseries.length > 1 && timeseries.forEach(e => {
-  //       e.points.forEach(p => {
-  //         if (JSON.stringify(p.value) !== '0') {
-  //           localConsumerCount = p.value
-  //         }
-  //       })
-  //     });
-  //   } catch (error) {
-  //     await createMetricDescriptor(moniteringClient)
-  //   } finally {
-  //     await writeTimeSeriesData(localConsumerCount, moniteringClient);
-  //   }
-  // })()
+  (async () => {
+    try {
+      const timeseries = await readTimeSeriesFields(moniteringClient)
+      timeseries.length > 1 && timeseries.forEach(e => {
+        e.points.forEach(p => {
+          if (JSON.stringify(p.value) !== '0') {
+            localConsumerCount = p.value
+          }
+        })
+      });
+    } catch (error) {
+      await createMetricDescriptor(moniteringClient)
+    } finally {
+      await writeTimeSeriesData(localConsumerCount, moniteringClient);
+    }
+  })()
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
@@ -163,13 +162,13 @@ mediasoup.observer.on("newworker", (worker) => {
         );
 
         localConsumerCount += 1;
-        // writeTimeSeriesData(localConsumerCount, moniteringClient);
+        writeTimeSeriesData(localConsumerCount, moniteringClient);
 
         consumer.observer.on("close", () => {
           console.log("consumer closed [consumer.id:%s]", consumer.id);
 
           localConsumerCount -= 1;
-          // writeTimeSeriesData(localConsumerCount, moniteringClient);
+          writeTimeSeriesData(localConsumerCount, moniteringClient);
         });
       });
     });
