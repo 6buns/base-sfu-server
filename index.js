@@ -1,7 +1,5 @@
 "use strict";
 const express = require("express");
-const http = require('http')
-const https = require('https')
 const os = require('os')
 
 require('dotenv').config()
@@ -45,7 +43,7 @@ app.get('/key', (req, res) => {
   })
 })
 
-const server = http.createServer(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(process.env.REDIS_URL);
   console.log(`Running on ${PORT}`);
 });
