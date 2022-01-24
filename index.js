@@ -10,8 +10,6 @@ const cpuCount = os.cpus().length;
 
 // App
 const app = express();
-const http = require("http");
-const server = http.createServer(app);
 const monitoring = require('@google-cloud/monitoring');
 const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
@@ -45,7 +43,7 @@ app.get('/key', (req, res) => {
   })
 })
 
-server.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(process.env.REDIS_URL);
   console.log(`Running on ${PORT}`);
 });
