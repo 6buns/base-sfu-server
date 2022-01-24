@@ -26,7 +26,6 @@ global.salt = '';
 global.consumerLimit = 100;
 global.localConsumerCount = 0;
 global.metadata = {};
-global.indexNotCreated = true;
 
 
 app.get("/", (req, res) => {

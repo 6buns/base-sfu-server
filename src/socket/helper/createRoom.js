@@ -11,11 +11,6 @@ const createRoom = async (room, options) => {
         router = rooms[room].router;
         peers = rooms[room].peers || [];
     } else {
-        if (indexNotCreated) {
-            console.log('Yahan aake ruk gya...')
-            await createIndexInRedis()
-            indexNotCreated = false
-        }
         // check in redis,
         const isInRedis = await findRoomInRedis(room)
         if (isInRedis) {

@@ -47,7 +47,13 @@ exports.findRoomInRedis = async function (id) {
 
     const repository = new Repository(schema, client);
 
-    const room = await repository.search().where('id').equals(id).and('source').true().return.first()
+    let room;
+
+    try {
+        room = await repository.search().where('id').equals(id).and('source').true().return.first()
+    } catch (error) {
+        await createIndexInRedis()
+    }
 
     return room
 
