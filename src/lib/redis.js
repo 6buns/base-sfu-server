@@ -22,7 +22,7 @@ let schema = new Schema(
 }
 )
 
-exports.createRoomInRedis = async function (id) {
+const createRoomInRedis = async function (id) {
     await connect();
 
     const repository = new Repository(schema, client);
@@ -34,7 +34,7 @@ exports.createRoomInRedis = async function (id) {
     return rid
 }
 
-exports.createIndexInRedis = async function () {
+const createIndexInRedis = async function () {
     await connect();
 
     const repository = new Repository(schema, client);
@@ -42,7 +42,7 @@ exports.createIndexInRedis = async function () {
     await repository.createIndex();
 }
 
-exports.findRoomInRedis = async function (id) {
+const findRoomInRedis = async function (id) {
     await connect();
 
     const repository = new Repository(schema, client);
@@ -53,8 +53,15 @@ exports.findRoomInRedis = async function (id) {
         room = await repository.search().where('id').equals(id).and('source').true().return.first()
     } catch (error) {
         await createIndexInRedis()
+        room = await repository.search().where('id').equals(id).and('source').true().return.first()
     }
 
     return room
 
+}
+
+
+exports.module = {
+    createRoomInRedis,
+    findRoomInRedis
 }
