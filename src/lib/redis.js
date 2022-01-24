@@ -60,8 +60,5 @@ const findRoomInRedis = async function (id) {
 
 }
 
-
-exports.module = {
-    createRoomInRedis,
-    findRoomInRedis
-}
+exports.findRoomInRedis = findRoomInRedis
+exports.createRoomInRedis = createRoomInRedis
