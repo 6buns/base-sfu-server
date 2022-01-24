@@ -5,7 +5,7 @@ const client = new Client();
 async function connect() {
     if (!client.isOpen()) {
         console.log('Trying to Connect.')
-        await client.open(`redis://${process.env.REDIS_PASS}@${process.env.REDIS_URL}`)
+        await client.open(`redis://:${process.env.REDIS_PASS}@${process.env.REDIS_URL}`)
     }
 }
 
