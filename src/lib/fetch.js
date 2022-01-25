@@ -16,7 +16,7 @@ exports.fetchMeta = async (url) => {
                     data += chunk;
                 });
                 res.on("end", () => {
-                    resolve(JSON.parse(data));
+                    resolve(data);
                 });
             })
             .on("error", (err) => {
