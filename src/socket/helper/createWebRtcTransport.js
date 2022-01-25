@@ -3,9 +3,18 @@ const { webRtcTransport_options } = require("../../../config/mediasoup");
 const createWebRtcTransport = async (router) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const webRtcTransport = await router.createWebRtcTransport(
-                webRtcTransport_options
-            );
+            console.log(metadata)
+            const webRtcTransport = await router.createWebRtcTransport({
+                listenIps: [
+                    {
+                        ip: metadata.ip,
+                        announcedIp: metadata.announcedIp
+                    },
+                ],
+                enableUdp: true,
+                enableTcp: true,
+                preferUdp: true,
+            });
 
             webRtcTransport.on("dtlsstatechange", (dtlsState) => {
                 if (dtlsState === "closed") {
