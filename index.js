@@ -14,9 +14,9 @@ const monitoring = require('@google-cloud/monitoring');
 const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
-const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
-const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
-const { createMetricDescriptor } = require("./src/lib/monitoring/create");
+// const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
+// const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
+// const { createMetricDescriptor } = require("./src/lib/monitoring/create");
 
 const moniteringClient = new monitoring.MetricServiceClient();
 process.env.DEBUG = "mediasoup*";
@@ -100,18 +100,18 @@ mediasoup.observer.on("newworker", (worker) => {
 
   (async () => {
     try {
-      const timeseries = await readTimeSeriesFields(moniteringClient)
-      timeseries.length > 1 && timeseries.forEach(e => {
-        e.points.forEach(p => {
-          if (JSON.stringify(p.value) !== '0') {
-            localConsumerCount = p.value
-          }
-        })
-      });
+      // const timeseries = await readTimeSeriesFields(moniteringClient)
+      // timeseries.length > 1 && timeseries.forEach(e => {
+      //   e.points.forEach(p => {
+      //     if (JSON.stringify(p.value) !== '0') {
+      //       localConsumerCount = p.value
+      //     }
+      //   })
+      // });
     } catch (error) {
-      await createMetricDescriptor(moniteringClient)
+      // await createMetricDescriptor(moniteringClient)
     } finally {
-      await writeTimeSeriesData(localConsumerCount, moniteringClient);
+      // await writeTimeSeriesData(localConsumerCount, moniteringClient);
     }
   })()
 
@@ -166,13 +166,13 @@ mediasoup.observer.on("newworker", (worker) => {
         );
 
         localConsumerCount += 1;
-        writeTimeSeriesData(localConsumerCount, moniteringClient);
+        // writeTimeSeriesData(localConsumerCount, moniteringClient);
 
         consumer.observer.on("close", () => {
           console.log("consumer closed [consumer.id:%s]", consumer.id);
 
           localConsumerCount -= 1;
-          writeTimeSeriesData(localConsumerCount, moniteringClient);
+          // writeTimeSeriesData(localConsumerCount, moniteringClient);
         });
       });
     });
