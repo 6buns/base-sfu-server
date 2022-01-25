@@ -8,13 +8,14 @@ exports.fetchMeta = async (url) => {
                 headers: {
                     'Metadata-Flavor': 'Google'
                 }
-            }, (resp) => {
+            }, (res) => {
+                if (res.statusCode !== 200) reject(`Request Failed, Status Code: ${res.statusCode}`)
                 let data = "";
-                resp.on("data", (chunk) => {
+                res.on("data", (chunk) => {
                     data += chunk;
                 });
-                resp.on("end", () => {
-                    resolve(data);
+                res.on("end", () => {
+                    resolve(JSON.parse(data));
                 });
             })
             .on("error", (err) => {
