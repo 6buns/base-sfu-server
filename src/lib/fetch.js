@@ -4,7 +4,7 @@ exports.fetchMeta = async (url) => {
     return new Promise((resolve, reject) => {
         http
             .get({
-                path: `http://metadata.google.internal/computeMetadata/v1/instance/${url}/`,
+                path: `http://metadata.google.internal/computeMetadata/v1/instance/${url}`,
                 headers: {
                     'Metadata-Flavor': 'Google'
                 }
