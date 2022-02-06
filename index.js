@@ -7,22 +7,25 @@ require('dotenv').config()
 // Constants
 const PORT = process.env.PORT || 80;
 const cpuCount = os.cpus().length;
+// const crypto = require('crypto')
+// const jose = require('jose')
+const { Server } = require("socket.io");
+const { createAdapter } = require("@socket.io/redis-adapter");
+const Redis = require("ioredis");
 
 // App
 const app = express();
-const monitoring = require('@google-cloud/monitoring');
+// const monitoring = require('@google-cloud/monitoring');
 const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
-// const { writeTimeSeriesData } = require("./src/lib/monitoring/write");
-// const { readTimeSeriesFields } = require("./src/lib/monitoring/read");
-// const { createMetricDescriptor } = require("./src/lib/monitoring/create");
+const { findRoomInRedis } = require("./src/lib/redis");
+const { Firestore } = require('@google-cloud/firestore');
 
-const moniteringClient = new monitoring.MetricServiceClient();
+const db = new Firestore();
+
 process.env.DEBUG = "mediasoup*";
 
-global.arr = [];
-global.salt = '';
 global.consumerLimit = 100;
 global.localConsumerCount = 0;
 global.metadata = {};
@@ -60,13 +63,11 @@ const server = app.listen(PORT, () => {
   } catch (error) {
     console.log(error)
   }
-
-  arr = new Array(5).fill('').map((e, i) => ~~(Math.random() * 39))
-  salt = new Array(39).fill('').map(e => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'[~~(Math.random() * 62)]).join('')
 })()
 
 global.worker = {};
 global.rooms = [];
+global.reportingInterval = {};
 
 (async () => {
   worker = await mediasoup.createWorker({
@@ -83,40 +84,71 @@ global.rooms = [];
   });
 })();
 
-const io = require("socket.io")(server);
+// const pubClient = new Redis(`redis://:${process.env.REDIS_PASS}@${process.env.REDIS_URL}`);
+// const subClient = pubClient.duplicate();
+// const keyStoreRef = db.collection('keyStore')
 
-io.use((socket, next) => {
-  if (keyVerify(socket.handshake.auth.key)) {
-    next();
-  } else {
-    next(new Error("unauthorized"))
-  }
-})
+const io = new Server(server);
+// io.adapter(createAdapter(pubClient, subClient));
+io.listen(server);
+
+// io.use((socket, next) => {
+//   const apiHash = crypto.createHash('md5').update(socket.handshake.auth.key).digest('hex');
+//   // let secret = '';
+//   const doc = await keyStoreRef.where('key', '==', apiHash).get();
+//   if (!doc.exists) {
+//     next(new Error("Unauthorized"))
+//   } else {
+//     const { uid } = doc.data();
+//     socket.uid = uid
+//   }
+//   // apiSnapshot.forEach(doc => ({ secret, scopes } = doc.data()))
+//   // jose.jwtVerify(socket.handshake.auth.jwt, secret).then(({ payload }) => {
+//   //   next();
+//   // }).catch((err) => {
+//   // })
+// })
 
 require("./src/socket")(io);
+
+const statRef = db.collection('stats')
+
+const statsReport = async () => {
+  if (rooms.length > 1) {
+    rooms.forEach(room => {
+      let roomStat = {}
+
+      room.peers.forEach(peer => {
+        let peerStat = {}
+        peer.consumerTransports.forEach(transport => {
+          peerStat[transport.id] = await transport.getStats()
+        })
+
+        peer.consumers.forEach(consumer => {
+          peerStat[consumer.id] = await consumer.getStats()
+        })
+
+        roomStat[peer.id] = { ...peerStat }
+      })
+
+      if (room.pipeTransport !== {}) {
+        roomStat['pipeTransport'] = room.pipeTransport.getStats()
+      }
+
+      // write to db, or pass onto stat server,
+      await statRef.add({ ...roomStat })
+    })
+  }
+}
 
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
 
-  (async () => {
-    try {
-      // const timeseries = await readTimeSeriesFields(moniteringClient)
-      // timeseries.length > 1 && timeseries.forEach(e => {
-      //   e.points.forEach(p => {
-      //     if (JSON.stringify(p.value) !== '0') {
-      //       localConsumerCount = p.value
-      //     }
-      //   })
-      // });
-    } catch (error) {
-      // await createMetricDescriptor(moniteringClient)
-    } finally {
-      // await writeTimeSeriesData(localConsumerCount, moniteringClient);
-    }
-  })()
+  reportingInterval = setInterval(statsReport, 60000)
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
+    clearInterval(reportingInterval)
   });
 
   worker.observer.on("newrouter", (router) => {
@@ -126,8 +158,18 @@ mediasoup.observer.on("newworker", (worker) => {
       JSON.stringify(rooms)
     );
 
-    router.observer.on("close", () => {
+    router.observer.on("close", async () => {
       console.log("router closed [router.id:%s]", JSON.stringify(rooms));
+
+      // remove original room from redis.
+      rooms.forEach(room => {
+        if (room.router.id === router.id) {
+          const roomRedis = await findRoomInRedis(room.name)
+          if (roomRedis) {
+            removeRoom(roomRedis)
+          }
+        }
+      });
     });
 
     router.observer.on("newtransport", (transport) => {

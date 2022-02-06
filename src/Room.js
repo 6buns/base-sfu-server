@@ -2,7 +2,7 @@ module.exports = class Room {
   constructor(roomName, router, pipeTransport) {
     this.name = roomName;
     this.router = router;
-    this.pipeTransport = pipeTransport;
+    this.pipeTransport = pipeTransport || {};
     this.peers = [];
     this.hasProducers = false;
     this.consumerCount = 0;

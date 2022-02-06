@@ -13,12 +13,13 @@ class Room extends Entity { }
 let schema = new Schema(
     Room,
     {
+        createdAt: { type: 'string' },
         id: { type: 'string', textSearch: true },
         ip: { type: 'string' },
-        announcedIp: { type: 'string' }
+        announcedIp: { type: 'string', textSearch: true },
     }, {
-    dataStructure: 'JSON'
-}
+        dataStructure: 'JSON'
+    }
 )
 
 const createRoomInRedis = async function (id) {
@@ -55,10 +56,16 @@ const findRoomInRedis = async function (id) {
         // await createIndexInRedis()
         room = null
     }
-
     return room
-
 }
+
+const removeRoom = async function (id) {
+    await connect();
+    const repo = new Repository(schema, client);
+
+    await repository.remove(id);
+ }
+
 
 exports.findRoomInRedis = findRoomInRedis
 exports.createRoomInRedis = createRoomInRedis
