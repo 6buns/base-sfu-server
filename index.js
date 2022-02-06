@@ -115,29 +115,32 @@ const statRef = db.collection('stats')
 
 const statsReport = async () => {
   if (rooms.length > 1) {
-    rooms.forEach(room => {
+    for (let i = 0; i < rooms.length; i++) {
       let roomStat = {}
+      const room = rooms[i];
 
-      room.peers.forEach(peer => {
-        let peerStat = {}
-        peer.consumerTransports.forEach(transport => {
-          peerStat[transport.id] = await transport.getStats()
-        })
-
-        peer.consumers.forEach(consumer => {
+      for (let k = 0; k < room.peers.length; k++) {
+        const peer = room.peers[k];
+        let peerStat = {};
+        for (let l = 0; l < peer.consumers.length; l++) {
+          const consumer = peer.consumers[l];
           peerStat[consumer.id] = await consumer.getStats()
-        })
+        }
+
+        for (let m = 0; m < peer.consumerTransports.length; m++) {
+          const transport = peer.consumerTransports[m];
+          peerStat[transport.id] = await transport.getStats()
+        }
 
         roomStat[peer.id] = { ...peerStat }
-      })
-
+      }
       if (room.pipeTransport !== {}) {
         roomStat['pipeTransport'] = room.pipeTransport.getStats()
       }
 
       // write to db, or pass onto stat server,
       await statRef.add({ ...roomStat })
-    })
+    }
   }
 }
 
