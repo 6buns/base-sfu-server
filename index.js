@@ -144,7 +144,7 @@ const statsReport = async () => {
   }
 }
 
-mediasoup.observer.on("newworker", (worker) => {
+mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
 
   reportingInterval = setInterval(statsReport, 60000)
@@ -154,7 +154,7 @@ mediasoup.observer.on("newworker", (worker) => {
     clearInterval(reportingInterval)
   });
 
-  worker.observer.on("newrouter", (router) => {
+  worker.observer.on("newrouter", async (router) => {
     console.log(
       "new router created [worker.pid:%d, router.id:%s]",
       worker.pid,
@@ -211,13 +211,11 @@ mediasoup.observer.on("newworker", (worker) => {
         );
 
         localConsumerCount += 1;
-        // writeTimeSeriesData(localConsumerCount, moniteringClient);
 
         consumer.observer.on("close", () => {
           console.log("consumer closed [consumer.id:%s]", consumer.id);
 
           localConsumerCount -= 1;
-          // writeTimeSeriesData(localConsumerCount, moniteringClient);
         });
       });
     });
