@@ -90,7 +90,7 @@ global.reportingInterval = {};
 
 const io = new Server(server);
 // io.adapter(createAdapter(pubClient, subClient));
-io.listen(server);
+// io.listen(server);
 
 // io.use((socket, next) => {
 //   const apiHash = crypto.createHash('md5').update(socket.handshake.auth.key).digest('hex');
