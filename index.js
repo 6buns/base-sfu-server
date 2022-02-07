@@ -164,15 +164,15 @@ mediasoup.observer.on("newworker", async (worker) => {
     router.observer.on("close", async () => {
       console.log("router closed [router.id:%s]", JSON.stringify(rooms));
 
-      // remove original room from redis.
-      rooms.forEach(room => {
-        if (room.router.id === router.id) {
-          const roomRedis = await findRoomInRedis(room.name)
-          if (roomRedis) {
-            removeRoom(roomRedis)
-          }
-        }
-      });
+      // // remove original room from redis.
+      // rooms.forEach(room => {
+      //   if (room.router.id === router.id) {
+      //     const roomRedis = await findRoomInRedis(room.name)
+      //     if (roomRedis) {
+      //       removeRoom(roomRedis)
+      //     }
+      //   }
+      // });
     });
 
     router.observer.on("newtransport", (transport) => {
