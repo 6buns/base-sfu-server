@@ -66,6 +66,24 @@ const senderProduce = (io, socket) => {
   };
 };
 
+// const senderPause = (io, socket) => {
+//   return ({ roomId }, callback) => {
+//     const room = rooms[roomId];
+//     const peer = room._getPeer(socket.id);
+
+//     try {
+//       peer._getTransport(false).close();
+
+//       if (!(room._getProducers.length > 0)) room.hasProducers = false;
+
+//       callback({ status: "Producer Transport Disconnected" });
+//     } catch (error) {
+//       callback({ status: error });
+//       console.log(error);
+//     }
+//   };
+// };
+
 const senderClose = (io, socket) => {
   return ({ roomId }, callback) => {
     const room = rooms[roomId];
