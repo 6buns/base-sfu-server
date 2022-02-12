@@ -4,14 +4,14 @@ const senderConnect = (io, socket) => {
     const peer = room._getPeer(socket.id);
 
     try {
-      await peer._getTransport(false).connect({ dtlsParameters });
-      callback({ status: "Producer Transport Connected" });
-
       /**
        * MAX Limit : 720p video
        */
       await peer._getTransport(false).setMaxIncomingBitrate(2500000);
       await peer._getTransport(false).setMaxOutgoingBitrate(2500000);
+
+      await peer._getTransport(false).connect({ dtlsParameters });
+      callback({ status: "Producer Transport Connected" });
     } catch (error) {
       callback({ status: error });
       console.log(error);

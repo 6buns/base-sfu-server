@@ -13,9 +13,8 @@ const createRoom = async (room, options) => {
     } else {
         // check in redis,
         const isInRedis = await findRoomInRedis(room)
+        router = await worker.createRouter({ mediaCodecs: codecs });
         if (isInRedis) {
-            // create a room.
-            router = await worker.createRouter({ mediaCodecs: codecs });
             // create a pipe,
             const pipeTransport = await router.createPipeTransport({
                 listenIp: [{ ip: isInRedis.ip, announcedIp: isInRedis.announcedIp }]
@@ -29,8 +28,6 @@ const createRoom = async (room, options) => {
             // store.
             rooms[room] = new Room(room, router);
         } else {
-            // create a room.
-            router = await worker.createRouter({ mediaCodecs: codecs });
             // store it in redis as original.
             await createRoomInRedis(room)
             // store.
