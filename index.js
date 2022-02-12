@@ -22,6 +22,12 @@ const { keygen, keyVerify } = require("./src/socket/helper/keygen");
 const { findRoomInRedis } = require("./src/lib/redis");
 const { Firestore } = require('@google-cloud/firestore');
 
+// Imports the Google Cloud Tasks library.
+const { CloudTasksClient } = require('@google-cloud/tasks');
+const { saveStat } = require("./src/lib/monitoring/saveStat");
+// Instantiates a client.
+const client = new CloudTasksClient();
+
 const db = new Firestore();
 
 process.env.DEBUG = "mediasoup*";
@@ -134,12 +140,15 @@ const statsReport = async () => {
 
         roomStat[peer.id] = { ...peerStat }
       }
+
       if (room.pipeTransport !== {}) {
         roomStat['pipeTransport'] = room.pipeTransport.getStats()
       }
 
-      // write to db, or pass onto stat server,
-      await statRef.add({ ...roomStat })
+      roomStat['name'] = room.name;
+      roomStat['routerId'] = room.router.id
+
+      await saveStat({ ...roomStat }, client)
     }
   }
 }
