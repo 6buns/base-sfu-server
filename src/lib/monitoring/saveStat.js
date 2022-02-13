@@ -16,7 +16,7 @@ exports.saveStat = async (payload, client) => {
     };
 
     if (payload) {
-        task.httpRequest.body = Buffer.from(payload).toString('base64');
+        task.httpRequest.body = payload;
     }
 
     // Send create task request.
