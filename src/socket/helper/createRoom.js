@@ -10,7 +10,7 @@ const createRoom = async (roomId, options) => {
     let router,
         peers = [],
         codecs = mediaCodecs[options?.type || "video"];
-    const room = rooms.get(roomId);
+    let room = rooms.get(roomId);
 
     if (room) {
         router = room.router;
@@ -35,8 +35,9 @@ const createRoom = async (roomId, options) => {
         // } else {
         // store it in redis as original.
         // await createRoomInRedis(room)
+        room = new Room(roomId, router)
         // store.
-        rooms.set(roomId, new Room(roomId, router))
+        rooms.set(roomId, room)
         // }
     }
 

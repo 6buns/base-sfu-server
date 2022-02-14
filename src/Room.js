@@ -44,6 +44,21 @@ module.exports = class Room {
     return prodList;
   };
 
+  _getRoomStat = () => {
+    return new Promise((resolve, reject) => {
+      let roomStat = {};
+      roomStat["name"] = this.name;
+      roomStat["routerId"] = this.router.id;
+      roomStat['timestamp'] = Date.now();
+
+      this.peers.forEach(peer => {
+        peer._getPeerStat().then(e => roomStat[peer.details.name] = e).catch(reject)
+      });
+      resolve(roomStat)
+    });
+
+  }
+
   _closeRoom = () => {
     this.router.close()
   };

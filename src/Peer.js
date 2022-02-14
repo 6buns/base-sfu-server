@@ -48,6 +48,25 @@ module.exports = class Peer {
     this.consumers.push(consumer);
   };
 
+  _getPeerStat = () => {
+    return new Promise((resolve, reject) => {
+      let peerStat = {};
+
+      peerStat['socketId'] = this.socket.id
+
+      this.consumers.forEach(consumer => {
+        consumer.getStat().then(e => peerStat[consumer.id] = e).catch(reject)
+      })
+
+      this.consumerTransports.forEach(transport => {
+        transport.getStat().then(e => peerStat['transport.id'] = e).catch(reject)
+      })
+
+      resolve(peerStat);
+    })
+
+  }
+
   _destroy = () => {
     this.producers &&
       this.producers.length > 0 &&
