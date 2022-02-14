@@ -1,7 +1,7 @@
 const disconnect = (io, socket) => {
     return async () => {
         await new Promise((resolve, reject) => {
-            rooms.forEach((roomId, room, rooms) => {
+            rooms.forEach((room, roomId, rooms) => {
                 try {
                     if (room._getPeer(socket.id) !== undefined) {
                         room._removePeer(socket.id);
