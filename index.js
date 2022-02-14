@@ -122,20 +122,19 @@ reportingInterval = setInterval(() => {
     for (let i = 0; i < rooms.length; i++) {
       let roomStat = {};
       const room = rooms[i];
+      console.log(`Stat saving of ${room.name}`)
 
       for (let k = 0; k < room.peers.length; k++) {
         const peer = room.peers[k];
         let peerStat = {};
         for (let l = 0; l < peer.consumers.length; l++) {
-          const consumer = peer.consumers[l];
           // peerStat[consumer.id] = await consumer.getStats();
-          consumer.getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
+          peer.consumers[l].getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
         }
 
         for (let m = 0; m < peer.consumerTransports.length; m++) {
-          const transport = peer.consumerTransports[m];
           // peerStat[transport.id] = await transport.getStats();
-          transport.getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
+          peer.consumerTransports[m].getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
         }
 
         roomStat[peer.id] = { ...peerStat };
@@ -143,7 +142,7 @@ reportingInterval = setInterval(() => {
 
       if (room.pipeTransport !== {}) {
         // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
-        pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
+        room.pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
       }
 
       roomStat["name"] = room.name;
