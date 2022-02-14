@@ -24,7 +24,6 @@ const { Firestore } = require("@google-cloud/firestore");
 
 // Imports the Google Cloud Tasks library.
 const { CloudTasksClient } = require("@google-cloud/tasks");
-const { saveStat } = require("./src/lib/monitoring/saveStat");
 // Instantiates a client.
 const client = new CloudTasksClient();
 
@@ -117,12 +116,6 @@ const io = new Server(server);
 // })
 
 require("./src/socket")(io);
-
-const statRef = db.collection("stats");
-
-const statsReport = async () => {
-
-};
 
 mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
