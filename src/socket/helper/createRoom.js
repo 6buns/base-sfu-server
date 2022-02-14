@@ -1,9 +1,9 @@
 const { mediaCodecs } = require("../../../config/mediasoup");
-const {
-    createIndexInRedis,
-    findRoomInRedis,
-    createRoomInRedis,
-} = require("../../lib/redis");
+// const {
+//     createIndexInRedis,
+//     findRoomInRedis,
+//     createRoomInRedis,
+// } = require("../../lib/redis");
 const Room = require("../../Room");
 
 const createRoom = async (roomId, options) => {
