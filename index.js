@@ -1,8 +1,8 @@
 "use strict";
 const express = require("express");
-const os = require('os')
+const os = require("os");
 
-require('dotenv').config()
+require("dotenv").config();
 
 // Constants
 const PORT = process.env.PORT || 80;
@@ -20,10 +20,10 @@ const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
 const { findRoomInRedis } = require("./src/lib/redis");
-const { Firestore } = require('@google-cloud/firestore');
+const { Firestore } = require("@google-cloud/firestore");
 
 // Imports the Google Cloud Tasks library.
-const { CloudTasksClient } = require('@google-cloud/tasks');
+const { CloudTasksClient } = require("@google-cloud/tasks");
 const { saveStat } = require("./src/lib/monitoring/saveStat");
 // Instantiates a client.
 const client = new CloudTasksClient();
@@ -36,7 +36,6 @@ global.consumerLimit = 100;
 global.localConsumerCount = 0;
 global.metadata = {};
 
-
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
@@ -45,11 +44,11 @@ app.get("/test", (req, res) => {
   res.send(new Date().toLocaleString());
 });
 
-app.get('/key', (req, res) => {
+app.get("/key", (req, res) => {
   res.status(200).json({
-    key: keygen()
-  })
-})
+    key: keygen(),
+  });
+});
 
 const server = app.listen(PORT, () => {
   console.log(process.env.REDIS_URL);
@@ -58,18 +57,20 @@ const server = app.listen(PORT, () => {
 
 (async () => {
   try {
-    metadata.id = ''
-    metadata.id = await fetchMeta('id')
+    metadata.id = "";
+    metadata.id = await fetchMeta("id");
 
-    metadata.ip = ''
-    metadata.ip = await fetchMeta('network-interfaces/0/ip')
+    metadata.ip = "";
+    metadata.ip = await fetchMeta("network-interfaces/0/ip");
 
-    metadata.announcedIp = ''
-    metadata.announcedIp = await fetchMeta('network-interfaces/0/access-configs/0/external-ip')
+    metadata.announcedIp = "";
+    metadata.announcedIp = await fetchMeta(
+      "network-interfaces/0/access-configs/0/external-ip"
+    );
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-})()
+})();
 
 global.worker = {};
 global.rooms = [];
@@ -117,50 +118,67 @@ const io = new Server(server);
 
 require("./src/socket")(io);
 
-const statRef = db.collection('stats')
+const statRef = db.collection("stats");
 
 const statsReport = async () => {
-  if (rooms.length > 1) {
-    for (let i = 0; i < rooms.length; i++) {
-      let roomStat = {}
-      const room = rooms[i];
 
-      for (let k = 0; k < room.peers.length; k++) {
-        const peer = room.peers[k];
-        let peerStat = {};
-        for (let l = 0; l < peer.consumers.length; l++) {
-          const consumer = peer.consumers[l];
-          peerStat[consumer.id] = await consumer.getStats()
-        }
-
-        for (let m = 0; m < peer.consumerTransports.length; m++) {
-          const transport = peer.consumerTransports[m];
-          peerStat[transport.id] = await transport.getStats()
-        }
-
-        roomStat[peer.id] = { ...peerStat }
-      }
-
-      if (room.pipeTransport !== {}) {
-        roomStat['pipeTransport'] = room.pipeTransport.getStats()
-      }
-
-      roomStat['name'] = room.name;
-      roomStat['routerId'] = room.router.id
-
-      await saveStat({ ...roomStat }, client)
-    }
-  }
-}
+};
 
 mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
 
-  reportingInterval = setInterval(statsReport, 60000)
+  reportingInterval = setInterval(() => {
+    if (rooms.length > 1) {
+      for (let i = 0; i < rooms.length; i++) {
+        let roomStat = {};
+        const room = rooms[i];
+
+        for (let k = 0; k < room.peers.length; k++) {
+          const peer = room.peers[k];
+          let peerStat = {};
+          for (let l = 0; l < peer.consumers.length; l++) {
+            const consumer = peer.consumers[l];
+            // peerStat[consumer.id] = await consumer.getStats();
+            consumer.getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
+          }
+
+          for (let m = 0; m < peer.consumerTransports.length; m++) {
+            const transport = peer.consumerTransports[m];
+            // peerStat[transport.id] = await transport.getStats();
+            transport.getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
+          }
+
+          roomStat[peer.id] = { ...peerStat };
+        }
+
+        if (room.pipeTransport !== {}) {
+          // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
+          pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
+        }
+
+        roomStat["name"] = room.name;
+        roomStat["routerId"] = room.router.id;
+
+        client
+          .createTask({
+            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+            task: {
+              httpRequest: {
+                httpMethod: "POST",
+                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+                body: JSON.stringify({ ...roomStat }),
+              },
+            },
+          })
+          .then((e) => console.log(`Created task ${response.name}`))
+          .catch((e) => console.error(`Unable to create task ${response.name}`));
+      }
+    }
+  }, 60000);
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
-    clearInterval(reportingInterval)
+    clearInterval(reportingInterval);
   });
 
   worker.observer.on("newrouter", async (router) => {
