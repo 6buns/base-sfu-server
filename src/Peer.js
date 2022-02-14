@@ -49,18 +49,28 @@ module.exports = class Peer {
   };
 
   _getPeerStat = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let peerStat = {};
 
-      peerStat['socketId'] = this.socket.id
+      peerStat['name'] = this.details.name
 
-      this.consumers.forEach(consumer => {
-        consumer.getStat().then(e => peerStat[consumer.id] = e).catch(reject)
-      })
+      await Promise.all(this.consumers.map(async (consumer) => {
+        try {
+          const e = await consumer.getStats();
+          peerStat[consumer.id] = e
+        } catch (error) {
+          reject(error)
+        }
+      }))
 
-      this.consumerTransports.forEach(transport => {
-        transport.getStat().then(e => peerStat['transport.id'] = e).catch(reject)
-      })
+      await Promise.all(this.consumerTransports.map(async (transport) => {
+        try {
+          const e = await transport.getStats()
+          peerStat[transport.id] = e
+        } catch (error) {
+          reject(error)
+        }
+      }))
 
       resolve(peerStat);
     })

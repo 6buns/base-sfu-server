@@ -117,63 +117,31 @@ const io = new Server(server);
 
 require("./src/socket")(io);
 
-reportingInterval = setInterval(() => {
+reportingInterval = setInterval(async () => {
   if (rooms.size > 0) {
-    rooms.forEach((room) => {
-      // let roomStat = {};
-      // console.log(`Stat saving of ${room.name}`);
-
-      // for (let k = 0; k < room.peers.length; k++) {
-      //   const peer = room.peers[k];
-      //   let peerStat = {};
-      //   for (let l = 0; l < peer.consumers.length; l++) {
-      //     const consumer = peer.consumers[l];
-      //     consumer
-      //       .getStats()
-      //       .then((e) => (peerStat[consumer.id] = e))
-      //       .catch(console.error);
-      //   }
-
-      //   for (let m = 0; m < peer.consumerTransports.length; m++) {
-      //     const transport = peer.consumerTransports[m];
-      //     transport.getStats()
-      //       .then((e) => (peerStat[transport.id] = e))
-      //       .catch(console.error);
-      //   }
-
-      //   roomStat[peer.id] = { ...peerStat };
-      // }
-
-      // // if (room.pipeTransport) {
-      // //   // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
-      // //   room.pipeTransport
-      // //     .getStats()
-      // //     .then((e) => (peerStat["pipeTransport"] = e))
-      // //     .catch((e) => (peerStat["pipeTransport"] = ""));
-      // // }
-
-      // roomStat["name"] = room.name;
-      // roomStat["routerId"] = room.router.id;
-      // roomStat['timestamp'] = Date.now()
-
-      room._getRoomStat().then(console.log).catch(console.error)
-
-      client
-        .createTask({
-          parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-          task: {
-            httpRequest: {
-              httpMethod: "POST",
-              url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-              body: JSON.stringify({ ...roomStat }),
-            },
-          },
-        })
-        .then((e) => console.log(`Created task ${response.name}`))
-        .catch((e) => console.error(`Unable to create task ${e}`));
-    });
+    for (const [id, room] of rooms) {
+      try {
+        const e = await room._getRoomStat()
+        console.log(e);
+        // client
+        //   .createTask({
+        //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+        //     task: {
+        //       httpRequest: {
+        //         httpMethod: "POST",
+        //         url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+        //         body: JSON.stringify({ ...e }),
+        //       },
+        //     },
+        //   })
+        //   .then((e) => console.log(`Created task ${response.name}`))
+        //   .catch((e) => console.error(`Unable to create task ${e}`));
+      } catch (error) {
+        console.error(error)
+      }
+    }
   }
-}, 6000);
+}, 5000);
 
 mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
