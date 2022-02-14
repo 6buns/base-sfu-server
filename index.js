@@ -145,7 +145,7 @@ reportingInterval = setInterval(() => {
         roomStat[peer.id] = { ...peerStat };
       }
 
-      if (room.pipeTransport !== {}) {
+      if (room.pipeTransport) {
         // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
         room.pipeTransport
           .getStats()
