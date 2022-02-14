@@ -19,7 +19,7 @@ const app = express();
 const mediasoup = require("mediasoup");
 const { fetchMeta } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
-const { findRoomInRedis } = require("./src/lib/redis");
+// const { findRoomInRedis } = require("./src/lib/redis");
 const { Firestore } = require("@google-cloud/firestore");
 
 // Imports the Google Cloud Tasks library.
@@ -118,7 +118,7 @@ const io = new Server(server);
 require("./src/socket")(io);
 
 reportingInterval = setInterval(() => {
-  if (rooms.size > 1) {
+  if (rooms.size > 0) {
     rooms.forEach((room) => {
       let roomStat = {};
       console.log(`Stat saving of ${room.name}`);
