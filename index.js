@@ -117,57 +117,58 @@ const io = new Server(server);
 
 require("./src/socket")(io);
 
+reportingInterval = setInterval(() => {
+  if (rooms.length > 1) {
+    for (let i = 0; i < rooms.length; i++) {
+      let roomStat = {};
+      const room = rooms[i];
+
+      for (let k = 0; k < room.peers.length; k++) {
+        const peer = room.peers[k];
+        let peerStat = {};
+        for (let l = 0; l < peer.consumers.length; l++) {
+          const consumer = peer.consumers[l];
+          // peerStat[consumer.id] = await consumer.getStats();
+          consumer.getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
+        }
+
+        for (let m = 0; m < peer.consumerTransports.length; m++) {
+          const transport = peer.consumerTransports[m];
+          // peerStat[transport.id] = await transport.getStats();
+          transport.getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
+        }
+
+        roomStat[peer.id] = { ...peerStat };
+      }
+
+      if (room.pipeTransport !== {}) {
+        // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
+        pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
+      }
+
+      roomStat["name"] = room.name;
+      roomStat["routerId"] = room.router.id;
+
+      client
+        .createTask({
+          parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+          task: {
+            httpRequest: {
+              httpMethod: "POST",
+              url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+              body: JSON.stringify({ ...roomStat }),
+            },
+          },
+        })
+        .then((e) => console.log(`Created task ${response.name}`))
+        .catch((e) => console.error(`Unable to create task ${response.name}`));
+    }
+  }
+}, 60000);
+
+
 mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
-
-  reportingInterval = setInterval(() => {
-    if (rooms.length > 1) {
-      for (let i = 0; i < rooms.length; i++) {
-        let roomStat = {};
-        const room = rooms[i];
-
-        for (let k = 0; k < room.peers.length; k++) {
-          const peer = room.peers[k];
-          let peerStat = {};
-          for (let l = 0; l < peer.consumers.length; l++) {
-            const consumer = peer.consumers[l];
-            // peerStat[consumer.id] = await consumer.getStats();
-            consumer.getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
-          }
-
-          for (let m = 0; m < peer.consumerTransports.length; m++) {
-            const transport = peer.consumerTransports[m];
-            // peerStat[transport.id] = await transport.getStats();
-            transport.getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
-          }
-
-          roomStat[peer.id] = { ...peerStat };
-        }
-
-        if (room.pipeTransport !== {}) {
-          // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
-          pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
-        }
-
-        roomStat["name"] = room.name;
-        roomStat["routerId"] = room.router.id;
-
-        client
-          .createTask({
-            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-            task: {
-              httpRequest: {
-                httpMethod: "POST",
-                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-                body: JSON.stringify({ ...roomStat }),
-              },
-            },
-          })
-          .then((e) => console.log(`Created task ${response.name}`))
-          .catch((e) => console.error(`Unable to create task ${response.name}`));
-      }
-    }
-  }, 60000);
 
   worker.observer.on("close", () => {
     console.log("worker closed [worker.pid:%d]", worker.pid);
