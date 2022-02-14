@@ -72,7 +72,7 @@ const server = app.listen(PORT, () => {
 })();
 
 global.worker = {};
-global.rooms = [];
+global.rooms = new Map();
 global.reportingInterval = {};
 
 (async () => {
@@ -118,23 +118,28 @@ const io = new Server(server);
 require("./src/socket")(io);
 
 reportingInterval = setInterval(() => {
-  if (rooms.length > 1) {
-    for (let i = 0; i < rooms.length; i++) {
+  if (rooms.size > 1) {
+    rooms.forEach((room) => {
       let roomStat = {};
-      const room = rooms[i];
-      console.log(`Stat saving of ${room.name}`)
+      console.log(`Stat saving of ${room.name}`);
 
       for (let k = 0; k < room.peers.length; k++) {
         const peer = room.peers[k];
         let peerStat = {};
         for (let l = 0; l < peer.consumers.length; l++) {
           // peerStat[consumer.id] = await consumer.getStats();
-          peer.consumers[l].getStats().then(e => peerStat[consumer.id] = e).catch(e => peerStat[consumer.id] = '')
+          peer.consumers[l]
+            .getStats()
+            .then((e) => (peerStat[consumer.id] = e))
+            .catch((e) => (peerStat[consumer.id] = ""));
         }
 
         for (let m = 0; m < peer.consumerTransports.length; m++) {
           // peerStat[transport.id] = await transport.getStats();
-          peer.consumerTransports[m].getStats().then(e => peerStat[transport.id] = e).catch(e => peerStat[transport.id] = '')
+          peer.consumerTransports[m]
+            .getStats()
+            .then((e) => (peerStat[transport.id] = e))
+            .catch((e) => (peerStat[transport.id] = ""));
         }
 
         roomStat[peer.id] = { ...peerStat };
@@ -142,7 +147,10 @@ reportingInterval = setInterval(() => {
 
       if (room.pipeTransport !== {}) {
         // roomStat["pipeTransport"] = await room.pipeTransport.getStats();
-        room.pipeTransport.getStats().then(e => peerStat['pipeTransport'] = e).catch(e => peerStat['pipeTransport'] = '')
+        room.pipeTransport
+          .getStats()
+          .then((e) => (peerStat["pipeTransport"] = e))
+          .catch((e) => (peerStat["pipeTransport"] = ""));
       }
 
       roomStat["name"] = room.name;
@@ -161,10 +169,9 @@ reportingInterval = setInterval(() => {
         })
         .then((e) => console.log(`Created task ${response.name}`))
         .catch((e) => console.error(`Unable to create task ${response.name}`));
-    }
+    });
   }
 }, 60000);
-
 
 mediasoup.observer.on("newworker", async (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
@@ -178,11 +185,13 @@ mediasoup.observer.on("newworker", async (worker) => {
     console.log(
       "new router created [worker.pid:%d, router.id:%s]",
       worker.pid,
-      JSON.stringify(rooms)
+      `Rooms : ${rooms.size}`
     );
 
     router.observer.on("close", async () => {
-      console.log("router closed [router.id:%s]", JSON.stringify(rooms));
+      console.log("router closed [router.id:%s]", `Rooms : ${rooms.size}`);
+
+      rooms.delete(router.id);
 
       // // remove original room from redis.
       // rooms.forEach(room => {

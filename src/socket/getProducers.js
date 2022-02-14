@@ -1,6 +1,6 @@
 const getProducers = (io, socket) => {
     return ({ roomId }, callback) => {
-        const room = rooms[roomId];
+        const room = room.get(roomId);
 
         callback(room._getProducers(socket.id));
     };

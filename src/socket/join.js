@@ -8,7 +8,7 @@ const join = (io, socket) => {
 
             const newPeer = new Peer(roomId, { name, isAdmin: false }, socket);
 
-            rooms[roomId]._addPeer(newPeer);
+            rooms.get(roomId)._addPeer(newPeer);
 
             const rtpCapabilities = router1.rtpCapabilities;
 

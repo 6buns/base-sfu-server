@@ -1,6 +1,6 @@
 const senderConnect = (io, socket) => {
   return async ({ dtlsParameters, roomId }, callback) => {
-    const room = rooms[roomId];
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
@@ -21,7 +21,7 @@ const senderConnect = (io, socket) => {
 
 const senderProduce = (io, socket) => {
   return async ({ kind, rtpParameters, roomId }, callback) => {
-    const room = rooms[roomId];
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
     let producer;
     // call produce based on the prameters from the client
@@ -68,7 +68,7 @@ const senderProduce = (io, socket) => {
 
 // const senderPause = (io, socket) => {
 //   return ({ roomId }, callback) => {
-//     const room = rooms[roomId];
+//     const room = rooms.get(roomId);
 //     const peer = room._getPeer(socket.id);
 
 //     try {
@@ -86,7 +86,7 @@ const senderProduce = (io, socket) => {
 
 const senderClose = (io, socket) => {
   return ({ roomId }, callback) => {
-    const room = rooms[roomId];
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
@@ -104,7 +104,7 @@ const senderClose = (io, socket) => {
 
 const recieverConnect = (io, socket) => {
   return async ({ dtlsParameters, serverConsumerTransportId, roomId }) => {
-    const room = rooms[roomId];
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
@@ -123,7 +123,7 @@ const recieverConsume = (io, socket) => {
     callback
   ) => {
     try {
-      const room = rooms[roomId];
+      const room = rooms.get(roomId);
       const peer = room._getPeer(socket.id);
       const router = room.router;
       const consumerTransport = peer._getTransport(
