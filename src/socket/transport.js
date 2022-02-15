@@ -30,7 +30,7 @@ const senderProduce = (io, socket) => {
         kind,
         rtpParameters,
       });
-      producer.getStats().then(console.log).catch(console.log)
+
     } catch (error) {
       console.log(error);
     }
