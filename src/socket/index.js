@@ -49,6 +49,6 @@ module.exports = (io) => {
         socket.on("transport:producer-connect", senderConnect(io, socket));
         socket.on("transport:producer-produce", senderProduce(io, socket));
         // socket.on("transport:producer-pause", senderPause(io, socket));
-        socket.on("transport:producer-close", senderClose(io, socket));
+        // socket.on("transport:producer-close", senderClose(io, socket));
     });
 };

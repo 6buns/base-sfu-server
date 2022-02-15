@@ -4,14 +4,13 @@ const senderConnect = (io, socket) => {
     const peer = room._getPeer(socket.id);
 
     try {
+      await peer._getTransport(false).connect({ dtlsParameters });
+      callback({ status: "Producer Transport Connected" });
       /**
        * MAX Limit : 720p video
        */
-      await peer._getTransport(false).setMaxIncomingBitrate(2500000);
-      await peer._getTransport(false).setMaxOutgoingBitrate(2500000);
-
-      await peer._getTransport(false).connect({ dtlsParameters });
-      callback({ status: "Producer Transport Connected" });
+      await peer._getTransport(false).setMaxIncomingBitrate(900000);
+      await peer._getTransport(false).setMaxOutgoingBitrate(900000);
     } catch (error) {
       callback({ status: error });
       console.log(error);
@@ -84,23 +83,23 @@ const senderProduce = (io, socket) => {
 //   };
 // };
 
-const senderClose = (io, socket) => {
-  return ({ roomId }, callback) => {
-    const room = rooms.get(roomId);
-    const peer = room._getPeer(socket.id);
+// const senderClose = (io, socket) => {
+//   return ({ roomId }, callback) => {
+//     const room = rooms.get(roomId);
+//     const peer = room._getPeer(socket.id);
 
-    try {
-      peer._getTransport(false).close();
+//     try {
+//       peer._getTransport(false).close();
 
-      if (!(room._getProducers.length > 0)) room.hasProducers = false;
+//       if (!(room._getProducers.length > 0)) room.hasProducers = false;
 
-      callback({ status: "Producer Transport Disconnected" });
-    } catch (error) {
-      callback({ status: error });
-      console.log(error);
-    }
-  };
-};
+//       callback({ status: "Producer Transport Disconnected" });
+//     } catch (error) {
+//       callback({ status: error });
+//       console.log(error);
+//     }
+//   };
+// };
 
 const recieverConnect = (io, socket) => {
   return async ({ dtlsParameters, serverConsumerTransportId, roomId }) => {
@@ -216,7 +215,7 @@ const recieverConsume = (io, socket) => {
 
 exports.senderConnect = senderConnect;
 exports.senderProduce = senderProduce;
-exports.senderClose = senderClose;
+// exports.senderClose = senderClose;
 
 exports.recieverConnect = recieverConnect;
 exports.recieverConsume = recieverConsume;

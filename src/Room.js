@@ -45,18 +45,24 @@ module.exports = class Room {
   };
 
   _getRoomStat = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let roomStat = {};
       roomStat["name"] = this.name;
       roomStat["routerId"] = this.router.id;
       roomStat['timestamp'] = Date.now();
+      roomStat['peers'] = this._countPeer();
 
-      this.peers.forEach(peer => {
-        peer._getPeerStat().then(e => roomStat[peer.details.name] = e).catch(reject)
-      });
+      await Promise.all(this.peers.map(async (peer) => {
+        try {
+          const peerStat = await peer._getPeerStat()
+          roomStat[peer.socket.id] = peerStat
+        } catch (error) {
+          reject(error)
+        }
+      }))
+
       resolve(roomStat)
     });
-
   }
 
   _closeRoom = () => {

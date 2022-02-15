@@ -12,7 +12,7 @@ const createRoom = async (roomId, options) => {
         codecs = mediaCodecs[options?.type || "video"];
     let room = rooms.get(roomId);
 
-    if (room) {
+    if (rooms.has(roomId)) {
         router = room.router;
         peers = room.peers || [];
     } else {
@@ -40,7 +40,6 @@ const createRoom = async (roomId, options) => {
         rooms.set(roomId, room)
         // }
     }
-
     return router;
 };
 
