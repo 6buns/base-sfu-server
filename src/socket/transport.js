@@ -9,12 +9,8 @@ const senderConnect = (io, socket) => {
       /**
        * MAX Limit : 720p video
        */
-<<<<<<< HEAD
       await peer._getTransport(false).setMaxIncomingBitrate(900000);
       await peer._getTransport(false).setMaxOutgoingBitrate(900000);
-=======
-      await peer._getTransport(false).setMaxOutgoingBitrate(2500000);
->>>>>>> 7a514cf696c5ec26fe974e2af6b2e103fb0e2853
     } catch (error) {
       callback({ status: error });
       console.log(error);

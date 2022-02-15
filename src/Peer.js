@@ -53,7 +53,6 @@ module.exports = class Peer {
       let peerStat = {};
 
       peerStat['name'] = this.details.name
-<<<<<<< HEAD
       peerStat['producers'] = []
       peerStat['producerTransports'] = []
       peerStat['consumers'] = []
@@ -68,13 +67,10 @@ module.exports = class Peer {
           reject(error)
         }
       }))
-=======
->>>>>>> 7a514cf696c5ec26fe974e2af6b2e103fb0e2853
 
       await Promise.all(this.consumers.map(async (consumer) => {
         try {
           const e = await consumer.getStats();
-<<<<<<< HEAD
           peerStat['consumers'] = [...e, ...peerStat['consumers'] ]
         } catch (error) {
           reject(error)
@@ -85,9 +81,6 @@ module.exports = class Peer {
         try {
           const e = await transport.getStats()
           peerStat['producerTransports'] = [...e, ...peerStat['producerTransports']]
-=======
-          peerStat[consumer.id] = e
->>>>>>> 7a514cf696c5ec26fe974e2af6b2e103fb0e2853
         } catch (error) {
           reject(error)
         }
@@ -96,11 +89,7 @@ module.exports = class Peer {
       await Promise.all(this.consumerTransports.map(async (transport) => {
         try {
           const e = await transport.getStats()
-<<<<<<< HEAD
           peerStat['consumerTransports'] = [...e, ...peerStat['consumerTransports']]
-=======
-          peerStat[transport.id] = e
->>>>>>> 7a514cf696c5ec26fe974e2af6b2e103fb0e2853
         } catch (error) {
           reject(error)
         }
