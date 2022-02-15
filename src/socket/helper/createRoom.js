@@ -8,13 +8,13 @@ const Room = require("../../Room");
 
 const createRoom = async (roomId, options) => {
     let router,
-        peers = [],
+        peers = new Map(),
         codecs = mediaCodecs[options?.type || "video"];
     let room = rooms.get(roomId);
 
     if (rooms.has(roomId)) {
         router = room.router;
-        peers = room.peers || [];
+        peers = room.peers || new Map();
     } else {
         // check in redis,
         // const isInRedis = await findRoomInRedis(room)

@@ -1,3 +1,4 @@
+
 module.exports = class Peer {
   constructor(roomId, { name, isAdmin }, socket) {
     this.socket = socket;
@@ -34,7 +35,7 @@ module.exports = class Peer {
     for (const [id, producer] of this.producers) {
       producersIdList.push(id);
     }
-    return producersIdList;
+    return [...producersIdList];
   };
 
   _addConsumer = (consumer) => {
@@ -84,18 +85,12 @@ module.exports = class Peer {
   }
 
   _destroy = () => {
-    this.producers &&
-      this.producers.length > 0 &&
-      this.producers.splice(0, this.producers.length);
-    this.producerTransports &&
-      this.producerTransports.length > 0 &&
-      this.producerTransports.splice(0, this.producerTransports.length);
-    this.consumerTransports &&
-      this.consumerTransports.length > 0 &&
-      this.consumerTransports.splice(0, this.consumerTransports.length);
-    this.consumers &&
-      this.consumers.length > 0 &&
-      this.consumers.splice(0, this.consumers.length);
+    this.producers.size > 0 &&
+      this.producers.clear();
+    this.transports.size > 0 &&
+      this.transports.clear();
+    this.consumers.size > 0 &&
+      this.consumers.clear();
 
     this.socket = {};
     this.roomId = "";

@@ -77,7 +77,7 @@ global.reportingInterval = {};
 
 (async () => {
   worker = await mediasoup.createWorker({
-    logLevel: "debug",
+    logLevel: "error",
     rtcMinPort: 40000,
     rtcMaxPort: 49999,
   });
@@ -123,7 +123,7 @@ reportingInterval = setInterval(async () => {
       try {
         const e = await room._getRoomStat()
         console.log(e);
-        
+
         // client
         //   .createTask({
         //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
