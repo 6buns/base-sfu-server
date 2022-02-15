@@ -4,7 +4,7 @@ const recieverResume = (io, socket) => {
         const peer = room._getPeer(socket.id);
 
         await peer.consumers
-            .find((consumerData) => consumerData.id === serverConsumerId)
+            .get(serverConsumerId)
             .resume();
     };
 };

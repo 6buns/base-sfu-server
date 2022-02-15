@@ -20,7 +20,7 @@ const createWebRtcTransportHandler = (io, socket) => {
                     });
 
                     // add transport to Peer's properties
-                    peer._addTransport(consumer, transport);
+                    peer._addTransport(transport);
                 },
                 (error) => {
                     console.log(error);

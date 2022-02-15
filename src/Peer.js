@@ -3,10 +3,9 @@ module.exports = class Peer {
     this.socket = socket;
     this.roomId = roomId;
 
-    this.producerTransports = [];
-    this.consumerTransports = [];
-    this.producers = [];
-    this.consumers = [];
+    this.transports = new Map();
+    this.producers = new Map();
+    this.consumers = new Map();
 
     this.details = {
       name: name || "",
@@ -14,38 +13,32 @@ module.exports = class Peer {
     };
   }
 
-  _addTransport = (consume, transport) => {
-    if (consume) {
-      this.consumerTransports.push(transport);
-    } else {
-      this.producerTransports[0] = (transport);
-    }
+  _addTransport = (transport) => {
+    this.transports.set(transport.id, transport)
   };
 
-  _getTransport = (consume, transportId) => {
-    if (consume) {
-      return this.consumerTransports.find(
-        (transport) => transport.id === transportId
-      );
-    } else {
-      return this.producerTransports[0];
-    }
+  _getTransport = (transportId) => {
+    return this.transports.get(transportId)
   };
 
   _addProducer = (producer) => {
-    this.producers.push(producer);
+    this.producers.set(producer.id, producer);
   };
 
   _getProducer = (producerId) => {
-    return this.producers.find((producer) => producer.id === producerId);
+    return this.producers.get(producerId);
   };
 
   _getAllProducers = () => {
-    return this.producers.map((producer) => producer.id);
+    let producersIdList = []
+    for (const [id, producer] of this.producers) {
+      producersIdList.push(id);
+    }
+    return producersIdList;
   };
 
   _addConsumer = (consumer) => {
-    this.consumers.push(consumer);
+    this.consumers.set(consumer.id, consumer);
   };
 
   _getPeerStat = () => {
@@ -54,11 +47,10 @@ module.exports = class Peer {
 
       peerStat['name'] = this.details.name
       peerStat['producers'] = []
-      peerStat['producerTransports'] = []
       peerStat['consumers'] = []
-      peerStat['consumerTransports'] = []
+      peerStat['transports'] = []
 
-      await Promise.all(this.producers.map(async (producer) => {
+      for (const [id, producer] of this.producers) {
         try {
           const e = await producer.getStats();
           peerStat['producers'] = [...e, ...peerStat['producers']]
@@ -66,34 +58,25 @@ module.exports = class Peer {
           console.log(error)
           reject(error)
         }
-      }))
+      }
 
-      await Promise.all(this.consumers.map(async (consumer) => {
+      for (const [id, consumer] of this.consumers) {
         try {
           const e = await consumer.getStats();
-          peerStat['consumers'] = [...e, ...peerStat['consumers'] ]
+          peerStat['consumers'] = [...e, ...peerStat['consumers']]
         } catch (error) {
           reject(error)
         }
-      }))
+      }
 
-      await Promise.all(this.producerTransports.map(async (transport) => {
+      for (const [id, transport] of this.transports) {
         try {
           const e = await transport.getStats()
-          peerStat['producerTransports'] = [...e, ...peerStat['producerTransports']]
+          peerStat['transports'] = [...e, ...peerStat['transports']]
         } catch (error) {
           reject(error)
         }
-      }))
-
-      await Promise.all(this.consumerTransports.map(async (transport) => {
-        try {
-          const e = await transport.getStats()
-          peerStat['consumerTransports'] = [...e, ...peerStat['consumerTransports']]
-        } catch (error) {
-          reject(error)
-        }
-      }))
+      }
 
       resolve(peerStat);
     })

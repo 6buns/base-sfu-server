@@ -123,6 +123,7 @@ reportingInterval = setInterval(async () => {
       try {
         const e = await room._getRoomStat()
         console.log(e);
+        
         // client
         //   .createTask({
         //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),

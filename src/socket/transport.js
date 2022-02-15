@@ -1,16 +1,17 @@
 const senderConnect = (io, socket) => {
-  return async ({ dtlsParameters, roomId }, callback) => {
+  return async ({ dtlsParameters, transportId, roomId }, callback) => {
     const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
-      await peer._getTransport(false).connect({ dtlsParameters });
+      const transport = await peer._getTransport(transportId);
+      transport.connect({ dtlsParameters });
       callback({ status: "Producer Transport Connected" });
-      /**
-       * MAX Limit : 720p video
-       */
-      await peer._getTransport(false).setMaxIncomingBitrate(900000);
-      await peer._getTransport(false).setMaxOutgoingBitrate(900000);
+      // /**
+      //  * MAX Limit : 720p video
+      //  */
+      // transport.setMaxIncomingBitrate(6000000);
+      // transport.setMaxOutgoingBitrate(6000000);
     } catch (error) {
       callback({ status: error });
       console.log(error);
@@ -19,16 +20,17 @@ const senderConnect = (io, socket) => {
 };
 
 const senderProduce = (io, socket) => {
-  return async ({ kind, rtpParameters, roomId }, callback) => {
+  return async ({ kind, transportId, rtpParameters, roomId }, callback) => {
     const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
     let producer;
     // call produce based on the prameters from the client
     try {
-      producer = await peer._getTransport(false).produce({
+      producer = await peer._getTransport(transportId).produce({
         kind,
         rtpParameters,
       });
+      producer.getStats().then(console.log).catch(console.log)
     } catch (error) {
       console.log(error);
     }
@@ -108,7 +110,7 @@ const recieverConnect = (io, socket) => {
 
     try {
       await peer
-        ._getTransport(true, serverConsumerTransportId)
+        ._getTransport(serverConsumerTransportId)
         .connect({ dtlsParameters });
     } catch (error) {
       console.log(error);
@@ -125,10 +127,7 @@ const recieverConsume = (io, socket) => {
       const room = rooms.get(roomId);
       const peer = room._getPeer(socket.id);
       const router = room.router;
-      const consumerTransport = peer._getTransport(
-        true,
-        serverConsumerTransportId
-      );
+      const consumerTransport = peer._getTransport(serverConsumerTransportId);
 
       // check if the router can consume the specified producer
       if (
