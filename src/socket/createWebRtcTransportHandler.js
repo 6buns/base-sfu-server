@@ -11,12 +11,10 @@ const createWebRtcTransportHandler = (io, socket) => {
             .then(
                 (transport) => {
                     callback({
-                        params: {
-                            id: transport.id,
-                            iceParameters: transport.iceParameters,
-                            iceCandidates: transport.iceCandidates,
-                            dtlsParameters: transport.dtlsParameters,
-                        },
+                        id: transport.id,
+                        iceParameters: transport.iceParameters,
+                        iceCandidates: transport.iceCandidates,
+                        dtlsParameters: transport.dtlsParameters,
                     });
 
                     // add transport to Peer's properties
