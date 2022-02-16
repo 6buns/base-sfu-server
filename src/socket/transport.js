@@ -70,42 +70,6 @@ const senderProduce = (io, socket) => {
   };
 };
 
-// const senderPause = (io, socket) => {
-//   return ({ roomId }, callback) => {
-//     const room = rooms.get(roomId);
-//     const peer = room._getPeer(socket.id);
-
-//     try {
-//       peer._getTransport(false).close();
-
-//       if (!(room._getProducers.length > 0)) room.hasProducers = false;
-
-//       callback({ status: "Producer Transport Disconnected" });
-//     } catch (error) {
-//       callback({ status: error });
-//       console.log(error);
-//     }
-//   };
-// };
-
-// const senderClose = (io, socket) => {
-//   return ({ roomId }, callback) => {
-//     const room = rooms.get(roomId);
-//     const peer = room._getPeer(socket.id);
-
-//     try {
-//       peer._getTransport(false).close();
-
-//       if (!(room._getProducers.length > 0)) room.hasProducers = false;
-
-//       callback({ status: "Producer Transport Disconnected" });
-//     } catch (error) {
-//       callback({ status: error });
-//       console.log(error);
-//     }
-//   };
-// };
-
 const recieverConnect = (io, socket) => {
   return async ({ dtlsParameters, serverConsumerTransportId, roomId }) => {
     const room = rooms.get(roomId);
@@ -141,13 +105,6 @@ const recieverConsume = (io, socket) => {
       ) {
         let consumer;
         try {
-          // transport can now consume and return a consumer
-          // consumer = await consumerTransport.consume({
-          //   producerId: remoteProducerId,
-          //   rtpCapabilities,
-          //   paused: true,
-          // });
-
           consumer = await consumerTransport.consume({
             producerId: remoteProducerId,
             rtpCapabilities,

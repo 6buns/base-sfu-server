@@ -1,7 +1,6 @@
 const createWebRtcTransport = async (router) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log(metadata)
             const webRtcTransport = await router.createWebRtcTransport({
                 listenIps: [
                     {
