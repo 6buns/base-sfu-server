@@ -116,107 +116,107 @@ const io = new Server(server);
 
 require("./src/socket")(io);
 
-// reportingInterval = setInterval(async () => {
-//   if (rooms.size > 0) {
-//     for (const [id, room] of rooms) {
-//       try {
-//         const e = await room._getRoomStat()
-//         console.log(e);
+reportingInterval = setInterval(async () => {
+  if (rooms.size > 0) {
+    for (const [id, room] of rooms) {
+      try {
+        const e = await room._getRoomStat()
+        console.log(e);
 
-//         // client
-//         //   .createTask({
-//         //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-//         //     task: {
-//         //       httpRequest: {
-//         //         httpMethod: "POST",
-//         //         url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-//         //         body: JSON.stringify({ ...e }),
-//         //       },
-//         //     },
-//         //   })
-//         //   .then((e) => console.log(`Created task ${response.name}`))
-//         //   .catch((e) => console.error(`Unable to create task ${e}`));
-//       } catch (error) {
-//         console.error(error)
-//       }
-//     }
-//   }
-// }, 5000);
+        client
+          .createTask({
+            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+            task: {
+              httpRequest: {
+                httpMethod: "POST",
+                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+                body: JSON.stringify({ ...e }),
+              },
+            },
+          })
+          .then((e) => console.log(`Created task ${response.name}`))
+          .catch((e) => console.error(`Unable to create task ${e}`));
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+}, 5000);
 
-// mediasoup.observer.on("newworker", async (worker) => {
-//   console.log("new worker created [worke.pid:%d]", worker.pid);
+mediasoup.observer.on("newworker", async (worker) => {
+  console.log("new worker created [worke.pid:%d]", worker.pid);
 
-//   worker.observer.on("close", () => {
-//     console.log("worker closed [worker.pid:%d]", worker.pid);
-//     clearInterval(reportingInterval);
-//   });
+  worker.observer.on("close", () => {
+    console.log("worker closed [worker.pid:%d]", worker.pid);
+    clearInterval(reportingInterval);
+  });
 
-//   worker.observer.on("newrouter", async (router) => {
-//     console.log(
-//       "new router created [worker.pid:%d, router.id:%s]",
-//       worker.pid,
-//       `Rooms : ${rooms.size}`
-//     );
+  worker.observer.on("newrouter", async (router) => {
+    console.log(
+      "new router created [worker.pid:%d, router.id:%s]",
+      worker.pid,
+      `Rooms : ${rooms.size}`
+    );
 
-//     router.observer.on("close", async () => {
-//       console.log("router closed [router.id:%s]", `Rooms : ${rooms.size}`);
+    router.observer.on("close", async () => {
+      console.log("router closed [router.id:%s]", `Rooms : ${rooms.size}`);
 
-//       rooms.delete(router.id);
+      rooms.delete(router.id);
 
-//       // // remove original room from redis.
-//       // rooms.forEach(room => {
-//       //   if (room.router.id === router.id) {
-//       //     const roomRedis = await findRoomInRedis(room.name)
-//       //     if (roomRedis) {
-//       //       removeRoom(roomRedis)
-//       //     }
-//       //   }
-//       // });
-//     });
+      // // remove original room from redis.
+      // rooms.forEach(room => {
+      //   if (room.router.id === router.id) {
+      //     const roomRedis = await findRoomInRedis(room.name)
+      //     if (roomRedis) {
+      //       removeRoom(roomRedis)
+      //     }
+      //   }
+      // });
+    });
 
-//     router.observer.on("newtransport", (transport) => {
-//       console.log(
-//         "new transport created [worker.pid:%d, router.id:%s, transport.id:%s]",
-//         worker.pid,
-//         router.id,
-//         transport.id
-//       );
+    router.observer.on("newtransport", (transport) => {
+      console.log(
+        "new transport created [worker.pid:%d, router.id:%s, transport.id:%s]",
+        worker.pid,
+        router.id,
+        transport.id
+      );
 
-//       transport.observer.on("close", () => {
-//         console.log("transport closed [transport.id:%s]", transport.id);
-//       });
+      transport.observer.on("close", () => {
+        console.log("transport closed [transport.id:%s]", transport.id);
+      });
 
-//       transport.observer.on("newproducer", (producer) => {
-//         console.log(
-//           "new producer created [worker.pid:%d, router.id:%s, transport.id:%s, producer.id:%s]",
-//           worker.pid,
-//           router.id,
-//           transport.id,
-//           producer.id
-//         );
+      transport.observer.on("newproducer", (producer) => {
+        console.log(
+          "new producer created [worker.pid:%d, router.id:%s, transport.id:%s, producer.id:%s]",
+          worker.pid,
+          router.id,
+          transport.id,
+          producer.id
+        );
 
-//         producer.observer.on("close", () => {
-//           console.log("producer closed [producer.id:%s]", producer.id);
-//         });
-//       });
+        producer.observer.on("close", () => {
+          console.log("producer closed [producer.id:%s]", producer.id);
+        });
+      });
 
-//       transport.observer.on("newconsumer", (consumer) => {
-//         console.log(
-//           "new consumer created [worker.pid:%d, router.id:%s, transport.id:%s, consumer.id:%s]",
-//           worker.pid,
-//           router.id,
-//           transport.id,
-//           consumer.id
-//         );
+      transport.observer.on("newconsumer", (consumer) => {
+        console.log(
+          "new consumer created [worker.pid:%d, router.id:%s, transport.id:%s, consumer.id:%s]",
+          worker.pid,
+          router.id,
+          transport.id,
+          consumer.id
+        );
 
-//         localConsumerCount += 1;
+        localConsumerCount += 1;
 
-//         consumer.observer.on("close", () => {
-//           console.log("consumer closed [consumer.id:%s]", consumer.id);
+        consumer.observer.on("close", () => {
+          console.log("consumer closed [consumer.id:%s]", consumer.id);
 
-//           localConsumerCount -= 1;
-//         });
-//       });
-//     });
-//   });
-// });
+          localConsumerCount -= 1;
+        });
+      });
+    });
+  });
+});
