@@ -1,7 +1,7 @@
 const { createWebRtcTransport } = require("./helper/createWebRtcTransport");
 
 const createWebRtcTransportHandler = (io, socket) => {
-    return async ({ consumer, roomId }, callback) => {
+    return async ({ roomId }, callback) => {
         const room = rooms.get(roomId);
         const peer = room._getPeer(socket.id);
 
