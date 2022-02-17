@@ -121,25 +121,25 @@ reportingInterval = setInterval(async () => {
         const e = await room._getRoomStat()
         console.log(e);
 
-        client
-          .createTask({
-            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-            task: {
-              httpRequest: {
-                httpMethod: "POST",
-                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-                body: JSON.stringify({ ...e }),
-              },
-            },
-          })
-          .then((e) => console.log(`Created task ${response.name}`))
-          .catch((e) => console.error(`Unable to create task ${e}`));
+        // client
+        //   .createTask({
+        //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+        //     task: {
+        //       httpRequest: {
+        //         httpMethod: "POST",
+        //         url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+        //         body: JSON.stringify({ ...e }),
+        //       },
+        //     },
+        //   })
+        //   .then((e) => console.log(`Created task ${response.name}`))
+        //   .catch((e) => console.error(`Unable to create task ${e}`));
       } catch (error) {
         console.error(error)
       }
     }
   }
-}, 60000);
+}, 5000);
 
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
