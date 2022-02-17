@@ -21,10 +21,10 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-EXPOSE 80:80
-
-EXPOSE 40000-49999:40000-49999/tcp
+EXPOSE 80:80/tcp
 
 EXPOSE 40000-49999:40000-49999/udp
+
+EXPOSE 40000-49999:40000-49999/tcp
 
 CMD [ "node", "index.js" ]
