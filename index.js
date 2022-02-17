@@ -5,7 +5,7 @@ const os = require("os");
 require("dotenv").config();
 
 // Constants
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8080;
 const cpuCount = os.cpus().length;
 // const crypto = require('crypto')
 // const jose = require('jose')
