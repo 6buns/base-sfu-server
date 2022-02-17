@@ -4,8 +4,8 @@ const createWebRtcTransport = async (router) => {
             const webRtcTransport = await router.createWebRtcTransport({
                 listenIps: [
                     {
-                        ip: metadata.ip || '0.0.0.0',
-                        announcedIp: metadata.announcedIp || '127.0.0.1',
+                        ip: metadata.ip,
+                        announcedIp: metadata.announcedIp,
                     },
                 ],
                 enableUdp: true,
