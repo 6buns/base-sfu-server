@@ -6,6 +6,7 @@ const senderConnect = (io, socket) => {
     try {
       const transport = await peer._getTransport(transportId);
       transport.connect({ dtlsParameters });
+      console.log(dtlsParameters)
       callback({ status: "Producer Transport Connected" });
       // /**
       //  * MAX Limit : 720p video
