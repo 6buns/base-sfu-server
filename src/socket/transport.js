@@ -4,9 +4,7 @@ const senderConnect = (io, socket) => {
     const peer = room._getPeer(socket.id);
 
     try {
-      const transport = await peer._getTransport(transportId);
-      transport.connect({ dtlsParameters });
-      console.log(dtlsParameters)
+      await peer._getTransport(transportId).connect({ dtlsParameters });
       callback({ status: "Producer Transport Connected" });
       // /**
       //  * MAX Limit : 720p video
