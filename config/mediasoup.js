@@ -60,17 +60,4 @@ const mediaCodecs = {
     ],
 };
 
-const webRtcTransport_options = {
-    listenIps: [
-        {
-            ip: metadata.ip,
-            announcedIp: metadata.announcedIp
-        },
-    ],
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true,
-};
-
 exports.mediaCodecs = mediaCodecs;
-exports.webRtcTransport_options = webRtcTransport_options;

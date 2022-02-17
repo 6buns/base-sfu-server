@@ -3,46 +3,66 @@ module.exports = class Room {
     this.name = roomName;
     this.router = router;
     this.pipeTransport = pipeTransport || {};
-    this.peers = [];
+    this.peers = new Map();
     this.hasProducers = false;
     this.consumerCount = 0;
   }
 
   _addPeer = (peer) => {
-    this.peers.push(peer);
+    this.peers.set(peer.socket.id, peer);
   };
 
   _getPeer = (sid) => {
-    return this.peers.find((peer) => peer.socket.id === sid);
+    return this.peers.get(sid);
   };
 
   _countPeer = () => {
-    return this.peers.length;
+    return this.peers.size;
   };
 
   _informPeers = (sid, event, data, socket) => {
-    this.peers.length > 1 &&
-      this.peers.forEach((peer) => {
-        peer.socket.id !== sid && peer.socket.emit(event, { ...data });
-      });
+    if (this.peers.size > 1) {
+      for (const [id, peer] of this.peers) {
+        id !== sid && peer.socket.emit(event, { ...data });
+      }
+    }
   };
 
   _removePeer = (sid) => {
-    let i = this.peers.findIndex((peer) => peer.socket.id === sid);
-    if (i === -1) return;
-    this.peers[i]._destroy();
-    this.peers.splice(i, 1);
+    this.peers.get(sid)._destroy()
+    this.peers.delete(sid)
   };
 
   _getProducers = (sid) => {
     const prodList = [];
-    this.peers.forEach((peer) => {
+    for (const [id, peer] of this.peers) {
       if (peer.socket.id !== sid) {
         prodList.push(peer._getAllProducers());
       }
-    });
-    return prodList;
+    }
+    return [...prodList];
   };
+
+  _getRoomStat = () => {
+    return new Promise(async (resolve, reject) => {
+      let roomStat = {};
+      roomStat["name"] = this.name;
+      roomStat["routerId"] = this.router.id;
+      roomStat['timestamp'] = Date.now();
+      roomStat['peers'] = this._countPeer();
+
+      for (const [id, peer] of this.peers) {
+        try {
+          const peerStat = await peer._getPeerStat()
+          roomStat[peer.socket.id] = peerStat
+        } catch (error) {
+          reject(error)
+        }
+      }
+
+      resolve(roomStat)
+    });
+  }
 
   _closeRoom = () => {
     this.router.close()

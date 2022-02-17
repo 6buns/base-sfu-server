@@ -1,14 +1,11 @@
-const { webRtcTransport_options } = require("../../../config/mediasoup");
-
 const createWebRtcTransport = async (router) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log(metadata)
             const webRtcTransport = await router.createWebRtcTransport({
                 listenIps: [
                     {
                         ip: '0.0.0.0',
-                        announcedIp: metadata.announcedIp
+                        announcedIp: metadata.announcedIp || '192.168.1.37',
                     },
                 ],
                 enableUdp: true,

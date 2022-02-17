@@ -1,17 +1,16 @@
 const senderConnect = (io, socket) => {
-  return async ({ dtlsParameters, roomId }, callback) => {
-    const room = rooms[roomId];
+  return async ({ dtlsParameters, transportId, roomId }, callback) => {
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
-      await peer._getTransport(false).connect({ dtlsParameters });
+      await peer._getTransport(transportId).connect({ dtlsParameters });
       callback({ status: "Producer Transport Connected" });
-
-      /**
-       * MAX Limit : 720p video
-       */
-      await peer._getTransport(false).setMaxIncomingBitrate(2500000);
-      await peer._getTransport(false).setMaxOutgoingBitrate(2500000);
+      // /**
+      //  * MAX Limit : 720p video
+      //  */
+      // transport.setMaxIncomingBitrate(6000000);
+      // transport.setMaxOutgoingBitrate(6000000);
     } catch (error) {
       callback({ status: error });
       console.log(error);
@@ -20,16 +19,17 @@ const senderConnect = (io, socket) => {
 };
 
 const senderProduce = (io, socket) => {
-  return async ({ kind, rtpParameters, roomId }, callback) => {
-    const room = rooms[roomId];
+  return async ({ kind, transportId, rtpParameters, roomId }, callback) => {
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
     let producer;
     // call produce based on the prameters from the client
     try {
-      producer = await peer._getTransport(false).produce({
+      producer = await peer._getTransport(transportId).produce({
         kind,
         rtpParameters,
       });
+
     } catch (error) {
       console.log(error);
     }
@@ -66,50 +66,14 @@ const senderProduce = (io, socket) => {
   };
 };
 
-// const senderPause = (io, socket) => {
-//   return ({ roomId }, callback) => {
-//     const room = rooms[roomId];
-//     const peer = room._getPeer(socket.id);
-
-//     try {
-//       peer._getTransport(false).close();
-
-//       if (!(room._getProducers.length > 0)) room.hasProducers = false;
-
-//       callback({ status: "Producer Transport Disconnected" });
-//     } catch (error) {
-//       callback({ status: error });
-//       console.log(error);
-//     }
-//   };
-// };
-
-const senderClose = (io, socket) => {
-  return ({ roomId }, callback) => {
-    const room = rooms[roomId];
-    const peer = room._getPeer(socket.id);
-
-    try {
-      peer._getTransport(false).close();
-
-      if (!(room._getProducers.length > 0)) room.hasProducers = false;
-
-      callback({ status: "Producer Transport Disconnected" });
-    } catch (error) {
-      callback({ status: error });
-      console.log(error);
-    }
-  };
-};
-
 const recieverConnect = (io, socket) => {
   return async ({ dtlsParameters, serverConsumerTransportId, roomId }) => {
-    const room = rooms[roomId];
+    const room = rooms.get(roomId);
     const peer = room._getPeer(socket.id);
 
     try {
       await peer
-        ._getTransport(true, serverConsumerTransportId)
+        ._getTransport(serverConsumerTransportId)
         .connect({ dtlsParameters });
     } catch (error) {
       console.log(error);
@@ -123,13 +87,10 @@ const recieverConsume = (io, socket) => {
     callback
   ) => {
     try {
-      const room = rooms[roomId];
+      const room = rooms.get(roomId);
       const peer = room._getPeer(socket.id);
       const router = room.router;
-      const consumerTransport = peer._getTransport(
-        true,
-        serverConsumerTransportId
-      );
+      const consumerTransport = peer._getTransport(serverConsumerTransportId);
 
       // check if the router can consume the specified producer
       if (
@@ -140,13 +101,6 @@ const recieverConsume = (io, socket) => {
       ) {
         let consumer;
         try {
-          // transport can now consume and return a consumer
-          // consumer = await consumerTransport.consume({
-          //   producerId: remoteProducerId,
-          //   rtpCapabilities,
-          //   paused: true,
-          // });
-
           consumer = await consumerTransport.consume({
             producerId: remoteProducerId,
             rtpCapabilities,
@@ -216,7 +170,7 @@ const recieverConsume = (io, socket) => {
 
 exports.senderConnect = senderConnect;
 exports.senderProduce = senderProduce;
-exports.senderClose = senderClose;
+// exports.senderClose = senderClose;
 
 exports.recieverConnect = recieverConnect;
 exports.recieverConsume = recieverConsume;
