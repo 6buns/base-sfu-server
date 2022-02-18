@@ -1,6 +1,9 @@
 "use strict";
 const express = require("express");
 const os = require("os");
+const { Buffer } = require('buffer');
+const fs = require("fs");
+const https = require("https");
 
 require("dotenv").config();
 
@@ -45,10 +48,19 @@ app.get("/key", (req, res) => {
   });
 });
 
-const server = app.listen(PORT, () => {
+const options = {
+  key: fs.readFileSync('./ssl/server.key'),
+  cert: fs.readFileSync('./ssl/server.crt')
+}
+
+const server = https.createServer(options, app)
+
+server.listen(PORT, () => {
   console.log(process.env.REDIS_URL);
   console.log(`Running on ${PORT}`);
 });
+
+
 
 (async () => {
   try {
@@ -121,19 +133,19 @@ reportingInterval = setInterval(async () => {
         const e = await room._getRoomStat()
         console.log(e);
 
-        // client
-        //   .createTask({
-        //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-        //     task: {
-        //       httpRequest: {
-        //         httpMethod: "POST",
-        //         url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-        //         body: JSON.stringify({ ...e }),
-        //       },
-        //     },
-        //   })
-        //   .then((e) => console.log(`Created task ${response.name}`))
-        //   .catch((e) => console.error(`Unable to create task ${e}`));
+        client
+          .createTask({
+            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+            task: {
+              httpRequest: {
+                httpMethod: "POST",
+                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+                body: JSON.stringify({ ...e }),
+              },
+            },
+          })
+          .then((e) => console.log(`Created task ${response.name}`))
+          .catch((e) => console.error(`Unable to create task ${e}`));
       } catch (error) {
         console.error(error)
       }
