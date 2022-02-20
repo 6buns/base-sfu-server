@@ -1,11 +1,12 @@
 module.exports = class Room {
-  constructor(roomName, router, pipeTransport) {
-    this.name = roomName;
+  constructor({ name, router, pipeTransport }) {
+    this.name = name;
     this.router = router;
     this.pipeTransport = pipeTransport || {};
     this.peers = new Map();
     this.hasProducers = false;
     this.consumerCount = 0;
+    this.isOrign = Object.keys(this.pipeTransport).length > 0 ? false : true;
   }
 
   _addPeer = (peer) => {
@@ -49,12 +50,12 @@ module.exports = class Room {
       roomStat["name"] = this.name;
       roomStat["routerId"] = this.router.id;
       roomStat['timestamp'] = Date.now();
-      roomStat['peers'] = this._countPeer();
+      roomStat['peers'] = []
 
       for (const [id, peer] of this.peers) {
         try {
           const peerStat = await peer._getPeerStat()
-          roomStat[peer.socket.id] = peerStat
+          roomStat['peers'].push(peerStat)
         } catch (error) {
           reject(error)
         }
