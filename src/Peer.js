@@ -47,6 +47,7 @@ module.exports = class Peer {
       let peerStat = {};
 
       peerStat['name'] = this.details.name
+      peerStat['socketId'] = this.socket.id
       peerStat['producers'] = []
       peerStat['consumers'] = []
       peerStat['transports'] = []

@@ -1,11 +1,14 @@
 "use strict";
 const express = require("express");
 const os = require("os");
+const { Buffer } = require('buffer');
+const fs = require("fs");
+const https = require("https");
+const http = require("http");
 
 require("dotenv").config();
 
 // Constants
-const PORT = process.env.PORT || 8080;
 const cpuCount = os.cpus().length;
 // const crypto = require('crypto')
 // const jose = require('jose')
@@ -17,7 +20,7 @@ const Redis = require("ioredis");
 const app = express();
 // const monitoring = require('@google-cloud/monitoring');
 const mediasoup = require("mediasoup");
-const { fetchMeta } = require("./src/lib/fetch");
+const { fetchMeta, triggerCloudFunction } = require("./src/lib/fetch");
 const { keygen, keyVerify } = require("./src/socket/helper/keygen");
 // const { findRoomInRedis } = require("./src/lib/redis");
 const { Firestore } = require("@google-cloud/firestore");
@@ -45,10 +48,17 @@ app.get("/key", (req, res) => {
   });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(process.env.REDIS_URL);
-  console.log(`Running on ${PORT}`);
-});
+
+http.createServer(app).listen(80);
+
+const options = {
+  key: fs.readFileSync('./ssl/server.key'),
+  cert: fs.readFileSync('./ssl/server.crt')
+}
+
+const server = https.createServer(options, app)
+server.listen(443);
+
 
 (async () => {
   try {
@@ -121,19 +131,21 @@ reportingInterval = setInterval(async () => {
         const e = await room._getRoomStat()
         console.log(e);
 
-        // client
-        //   .createTask({
-        //     parent: client.queuePath("vide-336112", "us-central1", "reporter"),
-        //     task: {
-        //       httpRequest: {
-        //         httpMethod: "POST",
-        //         url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
-        //         body: JSON.stringify({ ...e }),
-        //       },
-        //     },
-        //   })
-        //   .then((e) => console.log(`Created task ${response.name}`))
-        //   .catch((e) => console.error(`Unable to create task ${e}`));
+        const statDecoded = Buffer.from(JSON.stringify({ ...e })).toString('base64')
+
+        client
+          .createTask({
+            parent: client.queuePath("vide-336112", "us-central1", "reporter"),
+            task: {
+              httpRequest: {
+                httpMethod: "POST",
+                url: "https://us-central1-vide-336112.cloudfunctions.net/saveStat",
+                body: statDecoded,
+              },
+            },
+          })
+          .then((e) => console.log(`Created task ${response.name}`))
+          .catch((e) => console.error(`Unable to create task ${e}`));
       } catch (error) {
         console.error(error)
       }
@@ -158,18 +170,12 @@ mediasoup.observer.on("newworker", (worker) => {
 
     router.observer.on("close", async () => {
       console.log("router closed [router.id:%s]", router.id);
-
+      let id;
+      rooms.forEach((value, key) => {
+        id = router.id === value.router.id ? key : ''
+      })
+      await triggerCloudFunction({ id }, 'cleanRoomSession');
       rooms.delete(router.id);
-
-      // // remove original room from redis.
-      // rooms.forEach(room => {
-      //   if (room.router.id === router.id) {
-      //     const roomRedis = await findRoomInRedis(room.name)
-      //     if (roomRedis) {
-      //       removeRoom(roomRedis)
-      //     }
-      //   }
-      // });
     });
 
     router.observer.on("newtransport", (transport) => {
