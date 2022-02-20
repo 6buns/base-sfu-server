@@ -1,5 +1,5 @@
 module.exports = class Room {
-  constructor({ name, router, pipeTransport }) {
+  constructor(name, router, pipeTransport) {
     this.name = name;
     this.router = router;
     this.pipeTransport = pipeTransport || {};
