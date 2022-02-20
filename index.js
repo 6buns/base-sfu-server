@@ -144,7 +144,7 @@ reportingInterval = setInterval(async () => {
               },
             },
           })
-          .then((e) => console.log(`Created task ${response.name}`))
+          .then((e) => console.log(`Created task ${e.name}`))
           .catch((e) => console.error(`Unable to create task ${e}`));
       } catch (error) {
         console.error(error)
@@ -188,6 +188,9 @@ mediasoup.observer.on("newworker", (worker) => {
 
       transport.observer.on("close", () => {
         console.log("transport closed [transport.id:%s]", transport.id);
+        rooms.forEach((room, key) => {
+          room
+        })
       });
 
       transport.observer.on("newproducer", (producer) => {

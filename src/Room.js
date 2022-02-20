@@ -9,17 +9,13 @@ module.exports = class Room {
     this.isOrign = Object.keys(this.pipeTransport).length > 0 ? false : true;
   }
 
-  _addPeer = (peer) => {
-    this.peers.set(peer.socket.id, peer);
-  };
+  _addPeer = (peer) => this.peers.set(peer.socket.id, peer);
 
-  _getPeer = (sid) => {
-    return this.peers.get(sid);
-  };
+  _getPeer = (sid) => this.peers.get(sid);
 
-  _countPeer = () => {
-    return this.peers.size;
-  };
+  _hasPeer = (sid) => this.peers.has(sid)
+
+  _countPeer = () => this.peers.size;
 
   _informPeers = (sid, event, data, socket) => {
     if (this.peers.size > 1) {
