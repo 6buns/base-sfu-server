@@ -49,7 +49,7 @@ app.get("/key", (req, res) => {
 });
 
 
-http.createServer(app).listen(80);
+// http.createServer(app).listen(80);
 
 const options = {
   key: fs.readFileSync('./ssl/server.key'),
