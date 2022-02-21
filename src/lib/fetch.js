@@ -1,4 +1,5 @@
 const http = require("http");
+const https = require("https");
 const { Buffer } = require('buffer');
 
 exports.fetchMeta = async (url) => {
@@ -37,11 +38,13 @@ exports.triggerCloudFunction = async (data, name) => {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(data)
         },
-        body: dataEncoded
+        body: dataEncoded,
+        key: fs.readFileSync('./ssl/server.key'),
+        cert: fs.readFileSync('./ssl/server.crt')
     }
 
     return new Promise((resolve, reject) => {
-        http.request(options, (res) => {
+        https.request(options, (res) => {
             if (res.statusCode !== 200) reject(`Request Failed, Status Code: ${res.statusCode}`)
             let data = "";
             res.on("data", (chunk) => {

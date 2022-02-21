@@ -127,13 +127,12 @@ require("./src/socket")(io);
 reportingInterval = setInterval(async () => {
   if (rooms.size > 0) {
     for (const [id, room] of rooms) {
+      const e = await room._getRoomStat();
+      let response;
+      const statDecoded = Buffer.from(JSON.stringify({ ...e })).toString('base64')
+
       try {
-        const e = await room._getRoomStat()
-        console.log(e);
-
-        const statDecoded = Buffer.from(JSON.stringify({ ...e })).toString('base64')
-
-        client
+        [response] = await client
           .createTask({
             parent: client.queuePath("vide-336112", "us-central1", "reporter"),
             task: {
@@ -143,15 +142,14 @@ reportingInterval = setInterval(async () => {
                 body: statDecoded,
               },
             },
-          })
-          .then((e) => console.log(`Created task ${e.name}`))
-          .catch((e) => console.error(`Unable to create task ${e}`));
+          });
       } catch (error) {
-        console.error(error)
+        console.log(error)
       }
+      console.log(`Created task ${response.name}`)
     }
   }
-}, 5000);
+}, 60000);
 
 mediasoup.observer.on("newworker", (worker) => {
   console.log("new worker created [worke.pid:%d]", worker.pid);
@@ -188,9 +186,6 @@ mediasoup.observer.on("newworker", (worker) => {
 
       transport.observer.on("close", () => {
         console.log("transport closed [transport.id:%s]", transport.id);
-        rooms.forEach((room, key) => {
-          room
-        })
       });
 
       transport.observer.on("newproducer", (producer) => {
